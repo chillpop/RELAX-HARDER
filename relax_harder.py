@@ -17,7 +17,9 @@ import math
 
 NUM_PIXELS = 120
 
+PLAYER_ONE_ADDRESS = '74:E5:43:BE:39:71'
 PLAYER_ONE_CHAR = '*'
+PLAYER_TWO_ADDRESS = '74:E5:43:B1:96:E0'
 PLAYER_TWO_CHAR = '^'
 
 def bar_from_datapoints(point1, point2):
@@ -78,8 +80,8 @@ if __name__ == '__main__':
         shared_params.targetFrameRate = 100.0; # let's go for it
     shared_params.debug = False
 
-    player1 = FakeHeadset(random_data=True) if test else BluetoothHeadset()
-    player2 = FakeHeadset(random_data=True) if test else BluetoothHeadset()
+    player1 = FakeHeadset(random_data=True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
+    player2 = FakeHeadset(random_data=True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
 
     threads = [
         HeadsetThread(shared_params, player1),        
