@@ -9,3 +9,4 @@ class SharedParameters(object):
     eeg1 = None
     eeg2 = None
     debug = True
+    frames_to_average = 5
