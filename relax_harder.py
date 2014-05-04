@@ -40,11 +40,11 @@ def delta_needed_to_win():
     elapsed_time = max(elapsed_time, 0)
     return max(MAX_DELTA - (CHANGE_IN_DELTA_PER_SECOND * elapsed_time), MIN_DELTA)
 
-def percentage_from_values(m1, m2):
+def percentage_from_values(value1, value2):
     percentage = 0.5
     #don't do anything unless we have both values
-    if m1 > 0.001 and m2 > 0.001:
-        delta = m1 - m2
+    if value1 > 0.001 and value2 > 0.001:
+        delta = value1 - value2
         #take the difference between the values
         #(delta / delta_needed_to_win) will be centered around zero
         percentage = delta / delta_needed_to_win()
