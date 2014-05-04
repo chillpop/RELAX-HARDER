@@ -1,0 +1,10 @@
+[Unit]
+Description=LEDScape UDP Receiver
+
+[Service]
+WorkingDirectory=/home/relax/
+ExecStart=/home/relax/run-ledscape
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
