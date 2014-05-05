@@ -95,13 +95,14 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
         now = time.time()
         response_level = None
         # Update our measurements, if we have a new one
-        if params.eeg and params.eeg != self.last_eeg and params.eeg.on:
+        eeg = params.eeg1
+        if eeg and eeg != self.last_eeg and eeg.on:
             if self.fading_to:
                 self.end_fade()
             # Prepend newest measurement and timestamp
-            self.measurements[:0] = [getattr(params.eeg, self.respond_to)]
+            self.measurements[:0] = [getattr(eeg, self.respond_to)]
             self.timestamps[:0] = [now]
-            self.last_eeg = params.eeg
+            self.last_eeg = eeg
             # Compute the parameter to send to our rendering function
             N = len(self.measurements)
             idx = 0
