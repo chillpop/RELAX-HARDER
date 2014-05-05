@@ -49,9 +49,9 @@ class Renderer:
     def _next(self):
         return self._get(self.nextPlaylist)
         
-    def render(self, model, params, frame):
+    def render(self, params, frame):
         if self.fade:
-            self.fade.render(model, params, frame)
+            self.fade.render(params, frame)
             if self.fade.done:
                 # If the fade was to a new playlist, set that one to active
                 if self.nextPlaylist:
@@ -60,8 +60,8 @@ class Renderer:
                 self.fade = None
         elif self.activePlaylist:
             for layer in self._active().selection():
-                layer.safely_render(model, params, frame)
-        self.gammaLayer.render(model, params, frame)
+                layer.safely_render(params, frame)
+        self.gammaLayer.render(params, frame)
         
     def advanceCurrentPlaylist(self, fadeTime=1):
         # Advance selection within current playlist
@@ -107,7 +107,7 @@ class Fade:
         self.startLayers = startLayers
         self.endLayers = endLayers # final layer list to be rendered after fade is done
     
-    def render(self, model, params, frame):
+    def render(self, params, frame):
         raise NotImplementedException("Implement in fader subclass")
         
         
@@ -121,13 +121,13 @@ class LinearFade(Fade):
         # set actual start time on first call to render
         self.start = None
         
-    def render(self, model, params, frame):
+    def render(self, params, frame):
         if not self.start:
             self.start = time.time()
         # render the end layers
         if self.endLayers:
             for layer in self.endLayers:
-                layer.safely_render(model, params, frame)
+                layer.safely_render(params, frame)
         percentDone = (time.time() - self.start) / self.duration
         if percentDone >= 1:
             self.done = True
@@ -138,7 +138,7 @@ class LinearFade(Fade):
             if self.startLayers:
                 frame2 = numpy.zeros(frame.shape)
                 for layer in self.startLayers:
-                    layer.safely_render(model, params, frame2) 
+                    layer.safely_render(params, frame2) 
                 numpy.multiply(frame2, 1-percentDone, frame2)
                 numpy.add(frame, frame2, frame)
             
@@ -149,11 +149,11 @@ class TwoStepFade(Fade):
         self.fade1 = fade1
         self.fade2 = fade2
     
-    def render(self, model, params, frame):
+    def render(self, params, frame):
         if not self.fade1.done:
-            self.fade1.render(model, params, frame)
+            self.fade1.render(params, frame)
         else:
-            self.fade2.render(model, params, frame)
+            self.fade2.render(params, frame)
             self.done = self.fade2.done
             
             

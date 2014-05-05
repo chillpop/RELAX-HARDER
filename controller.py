@@ -16,9 +16,8 @@ class AnimationController(object):
        rate control, and handles the advancement of time in EffectParameters.
        """
 
-    def __init__(self, model, renderer, params=None, server=None):
+    def __init__(self, renderer, params=None, server=None):
         self.opc = FastOPC(server)
-        self.model = model
         self.renderer = renderer
         self.params = params or EffectParameters()
 
@@ -71,9 +70,9 @@ class AnimationController(object):
 
         # Note: You'd think it would be faster to use float32 on the rPI, but
         #       32-bit floats take a slower path in NumPy sadly.
-        frame = numpy.zeros((self.model.numLEDs, 3))
+        frame = numpy.zeros((self.params.num_pixels, 3))
 
-        self.renderer.render(self.model, self.params, frame)
+        self.renderer.render(self.params, frame)
         return frame
 
     def frameToHardwareFormat(self, frame):
