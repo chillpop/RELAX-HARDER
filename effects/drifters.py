@@ -48,7 +48,7 @@ class ColorDrifterLayer(EffectLayer):
             self.fade_colors_hsv[range(i*self.fadeSteps,(i+1)*self.fadeSteps)] = between_colors
         self.fade_colors_rgb = matplotlib.colors.hsv_to_rgb(self.fade_colors_hsv.reshape(-1,1,3)).reshape(-1,3)
 
-    def render(self, model, params, frame, response_level):
+    def render(self, params, frame, response_level):
         raise NotImplementedError("Implement render_responsive in ColorDrifterLayer subclass")
         
 class TimedColorDrifterLayer(ColorDrifterLayer):    
@@ -63,53 +63,53 @@ class TimedColorDrifterLayer(ColorDrifterLayer):
         index = int( (time % self.secondsPerCycle) / self.secondsPerFadeColor )
         return self.fade_colors_rgb[index]
 
-    def render(self, model, params, frame):
+    def render(self, params, frame):
         c = self.getFadeColor(params.time)
         numpy.add(frame, c, frame)
 
 
-class TreeColorDrifterLayer(TimedColorDrifterLayer):
-    """ Each tree is a bit out of phase, so they drift through the colors at different times """
-    def __init__(self, colors, switchTime):
-        super(TreeColorDrifterLayer,self).__init__(colors, switchTime)
-        self.roots = None
-        self.cachedModel = None
+# class TreeColorDrifterLayer(TimedColorDrifterLayer):
+#     """ Each tree is a bit out of phase, so they drift through the colors at different times """
+#     def __init__(self, colors, switchTime):
+#         super(TreeColorDrifterLayer,self).__init__(colors, switchTime)
+#         self.roots = None
+#         self.cachedModel = None
         
-    def render(self, model, params, frame):
-        if self.roots is None or model != self.cachedModel:
-            self.cachedModel = model
-            self.roots = range(len(model.roots))
-            random.shuffle(self.roots)
-        cnt = len(self.roots)
+#     def render(self, model, params, frame):
+#         if self.roots is None or model != self.cachedModel:
+#             self.cachedModel = model
+#             self.roots = range(len(model.roots))
+#             random.shuffle(self.roots)
+#         cnt = len(self.roots)
         
-        # this is much uglier than iterating through the trees calling getFadeColor,
-        # but twice as fast
-        indices = ((params.time + numpy.array(model.edgeTree) * self.switchTime / cnt) 
-            % self.secondsPerCycle) / self.secondsPerFadeColor
-        frame += self.fade_colors_rgb[indices.astype(int)]
+#         # this is much uglier than iterating through the trees calling getFadeColor,
+#         # but twice as fast
+#         indices = ((params.time + numpy.array(model.edgeTree) * self.switchTime / cnt) 
+#             % self.secondsPerCycle) / self.secondsPerFadeColor
+#         frame += self.fade_colors_rgb[indices.astype(int)]
 
 
-class OutwardColorDrifterLayer(TimedColorDrifterLayer):
+# class OutwardColorDrifterLayer(TimedColorDrifterLayer):
     
-    # 0 means all levels are synced; 1 means that first level hits
-    # color[n+1] at the same time that the last one is hitting color[n]
-    offset = 0.5
+#     # 0 means all levels are synced; 1 means that first level hits
+#     # color[n+1] at the same time that the last one is hitting color[n]
+#     offset = 0.5
     
-    def __init__(self, colors, switchTime):
-        super(OutwardColorDrifterLayer,self).__init__(colors, switchTime)
-        self.levels = None
-        self.cachedModel = None
+#     def __init__(self, colors, switchTime):
+#         super(OutwardColorDrifterLayer,self).__init__(colors, switchTime)
+#         self.levels = None
+#         self.cachedModel = None
         
-    def render(self, model, params, frame):
-        if self.levels is None or model != self.cachedModel:
-            self.cachedModel = model
-            self.levels = max(model.edgeHeight)+1
+#     def render(self, model, params, frame):
+#         if self.levels is None or model != self.cachedModel:
+#             self.cachedModel = model
+#             self.levels = max(model.edgeHeight)+1
         
-        # this is much uglier than iterating through the levels calling 
-        # getFadeColor, but 3x as fast
-        indices = ((params.time + self.offset * self.switchTime * (1 - model.edgeHeight/float(self.levels))) 
-            % self.secondsPerCycle) / self.secondsPerFadeColor
-        frame += self.fade_colors_rgb[indices.astype(int)]
+#         # this is much uglier than iterating through the levels calling 
+#         # getFadeColor, but 3x as fast
+#         indices = ((params.time + self.offset * self.switchTime * (1 - model.edgeHeight/float(self.levels))) 
+#             % self.secondsPerCycle) / self.secondsPerFadeColor
+#         frame += self.fade_colors_rgb[indices.astype(int)]
 
             
 class ResponsiveColorDrifterLayer(HeadsetResponsiveEffectLayer):
@@ -125,7 +125,7 @@ class ResponsiveColorDrifterLayer(HeadsetResponsiveEffectLayer):
         index = int(ColorDrifterLayer.fadeSteps * response_level) if response_level else 0
         return self.drifter.fade_colors_rgb[index]
         
-    def render_responsive(self, model, params, frame, response_level):
+    def render_responsive(self, params, frame, response_level):
         c = self.getResponsiveColor(response_level)
         numpy.add(frame, c, frame)
         
