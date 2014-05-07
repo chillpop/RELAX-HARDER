@@ -12,7 +12,6 @@ from Mindwave.mindwave import BluetoothHeadset, FakeHeadset
 # Note: on OS X, BluetoothHeadset will not work
 from parameters import SharedParameters
 from threads import HeadsetThread
-from effects.base import EffectParameters
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
