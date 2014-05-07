@@ -1,0 +1,50 @@
+Notes
+
+BeagleBone Login
+u:debian
+p:RELAXHARDER
+
+u:relax
+p:RELAXHARDER
+
+Headset UUIDs
+
+74:E5:43:BE:39:71
+74:E5:43:B1:96:E0
+
+------------------
+
+startup
+some animation while waiting for things to connect
+countdown animation after everything is connected
+begin game timer
+loop 
+	calculate percentage
+	display calculated percentage
+		normal display
+		almost winning/losing display
+	if potential win
+		start winning timer
+	else 
+		stop winning timer
+
+	if winning timer has gone for long enough
+	or time has run out
+		end game loop
+
+display winning animation
+or display tied animation
+
+anytime:
+adjust brightness based on knob
+reset game based on button press
+adjust rules based on switch??
+
+
+
+playlist
+	waiting to connect
+	countdown to begin
+	percentage effect (game play)
+	potential winning effect
+	winning effect
