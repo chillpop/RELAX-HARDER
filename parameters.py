@@ -26,5 +26,7 @@ class SharedParameters(object):
     targetFrameRate = 59.0     # XXX: Want to go higher, but gl_server can't keep up!
     eeg1 = None
     eeg2 = None
+    percentage = 0.5
+
     debug = True
     frames_to_average = 5

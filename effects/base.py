@@ -5,16 +5,6 @@ import traceback
 import colorsys
 import random
 
-class EffectParameters(object):
-    """Inputs to the individual effect layers. Includes basics like the timestamp of the frame we're
-       generating, as well as parameters that may be used to control individual layers in real-time.
-       """
-
-    time = 0
-    targetFrameRate = 59.0     # XXX: Want to go higher, but gl_server can't keep up!
-    eeg = None
-
-
 class EffectLayer(object):
     """Abstract base class for one layer of an LED light effect. Layers operate on a shared framebuffer,
        adding their own contribution to the buffer and possibly blending or overlaying with data from
@@ -66,7 +56,7 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
     """
     def __init__(self, respond_to, smooth_response_over_n_secs=0, minimum_response_level=None, inverse=False):
         # Name of the eeg field to influence this effect
-        if respond_to not in ('attention', 'meditation'):
+        if respond_to not in ('attention', 'meditation', 'percentage'):
             raise Exception('respond_to was "%s" -- should be "attention" or "meditation"'
                             % respond_to)
         self.respond_to = respond_to

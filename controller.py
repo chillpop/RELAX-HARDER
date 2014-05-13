@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-from effects.base import EffectParameters
+from parameters import SharedParameters
 from renderer import Renderer
+from gameplay import GameObject
 import os
 import socket
 import time
@@ -16,10 +17,11 @@ class AnimationController(object):
        rate control, and handles the advancement of time in EffectParameters.
        """
 
-    def __init__(self, renderer, params=None, server=None):
+    def __init__(self, game_object, renderer, params=None, server=None):
         self.opc = FastOPC(server)
+        self.game_object = game_object
         self.renderer = renderer
-        self.params = params or EffectParameters()
+        self.params = params or SharedParameters()
 
         self._fpsFrames = 0
         self._fpsTime = 0
@@ -86,6 +88,7 @@ class AnimationController(object):
     def drawFrame(self):
         """Render a frame and send it to the OPC server"""
         self.advanceTime()
+        self.game_object.loop()
         pixels = self.renderLayers()
         self.frameToHardwareFormat(pixels)
         self.opc.putPixels(0, pixels)
