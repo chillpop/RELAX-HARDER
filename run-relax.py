@@ -6,7 +6,7 @@ from Mindwave.mindwave import BluetoothHeadset, FakeHeadset
 # Note: on OS X, BluetoothHeadset will not work
 from parameters import SharedParameters
 from threads import HeadsetThread
-from gameplay import GameObject
+from gameplay import GameObject, ResponsiveRedVersusBlue
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
@@ -30,13 +30,13 @@ if __name__ == '__main__':
     shared_params = SharedParameters()
     if not test:
         shared_params.targetFrameRate = 100.0;
-    shared_params.debug = False
+    # shared_params.debug = False
 
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
     player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
 
     effect_sequence = Playlist( [ 
-        [ResponsiveGreenHighRedLow(respond_to='meditation')] ] )
+        [ResponsiveRedVersusBlue()] ] )
 
     game = GameObject(shared_params)
     game.start()

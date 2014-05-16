@@ -2,8 +2,9 @@
 
 import time
 import numpy
+import math
 from parameters import SharedParameters, EEGInfo
-from effects.base import HeadsetResponsiveEffectLayer
+from effects.base import EffectLayer, HeadsetResponsiveEffectLayer
 
 MAX_DELTA = 1.0
 MIN_DELTA = 0.05
@@ -87,3 +88,52 @@ class GameObject(object):
                 self.winner = 'one' if self.potential_winner == 1.0 else 'two'
                 print 'winner is player %s' % self.winner   
                 # sys.exit(0)
+
+
+class PercentageResponsiveEffectLayer(EffectLayer):
+    """A layer effect that responds to the percentage of two MindWave headsets in some way.
+
+    Two major differences from EffectLayer:
+    1) Constructor expects one parameter:
+       -- inverse: If this is true, the layer will respond to (1-response_level)
+          instead of response_level
+    2) Subclasses now only implement the render_responsive() function, which
+       is the same as EffectLayer's render() function but has one extra
+       parameter, response_level, which is the current EEG value of the indicated
+       field (assumed to be on a 0-1 scale, or None if no value has been read yet).
+    """
+    def __init__(self, inverse=False):
+        self.inverse = inverse;
+
+    def render(self, params, frame):
+        response_level = params.percentage
+        if self.inverse:
+            response_level = 1.0 - response_level
+        self.render_responsive(params, frame, response_level)
+
+    def render_responsive(self, params, frame, response_level):
+        raise NotImplementedError(
+            "Implement render_responsive() in your PercentageResponsiveEffectLayer subclass")
+
+
+class ResponsiveRedVersusBlue(PercentageResponsiveEffectLayer):
+    def render_responsive(self, params, frame, response_level):
+        if response_level is None:
+            # No signal (blue)
+            frame[:] += [0.5, 0.5, 0.5]
+        else:
+            parts = divmod(len(frame) * response_level, 1.0)
+            dividing_pixel = int(parts[0])
+            remainder = parts[1]
+
+            window = 10
+
+            window_start = dividing_pixel - window
+            window_end = dividing_pixel + window + 1
+            frame[:window_start,2] += 1
+            alpha = 1.0 / (2*window + 1)
+            for idx in range(window_start, window_end):
+                value = alpha*(idx - window_start)
+                frame[idx] += [value, 0, 1-value]
+            # frame[dividing_pixel] += [1-remainder, 0, remainder]
+            frame[window_end:,0] += 1
