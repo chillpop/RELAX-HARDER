@@ -3,12 +3,15 @@
 import time
 import numpy
 from parameters import SharedParameters, EEGInfo
+from effects.base import HeadsetResponsiveEffectLayer
 
 MAX_DELTA = 1.0
 MIN_DELTA = 0.05
 CHANGE_IN_DELTA_PER_SECOND = 0.01
 ELAPSED_STARTUP_TIME = 2.0
-TIME_AT_MAX = 2.0
+TIME_AT_MAX = 3.0
+
+DEFAULT_ATTRIBUTE = 'meditation'
 
 class GameObject(object):
     """
@@ -16,8 +19,10 @@ class GameObject(object):
         """
     def __init__(self, params):
         self.params = params
-        self.player_one_attr = 'meditation'
-        self.player_two_attr = 'meditation'
+
+        self.layer1 = None
+        self.layer2 = None
+
         self.start_time = None
         self.win_time = None
         self.potential_winner = None
@@ -43,25 +48,34 @@ class GameObject(object):
             percentage = (1 + percentage) * 0.5
         return percentage
 
-    def start(self, player_one_attr='meditation', player_two_attr='meditation'):
+    def start(self, player_one_attr=DEFAULT_ATTRIBUTE, player_two_attr=DEFAULT_ATTRIBUTE):
+        self.layer1 = HeadsetResponsiveEffectLayer(respond_to=player_one_attr, 
+                                                    smooth_response_over_n_secs=self.params.frames_to_average)
+        self.layer2 = HeadsetResponsiveEffectLayer(respond_to=player_two_attr, 
+                                                    smooth_response_over_n_secs=self.params.frames_to_average)
+
         self.start_time = time.time()
-        self.player_one_attr = player_one_attr
-        self.player_two_attr = player_two_attr
         self.win_time = None
         self.potential_winner = None
         self.winner = None
 
     def loop(self):
-        point1 = self.params.eeg1
-        point2 = self.params.eeg2
-        if point1 != None and point2 != None and self.winner == None:
-            value1 = getattr(point1, self.player_one_attr)
-            value2 = getattr(point2, self.player_two_attr)
+        value1 = self.layer1.calculate_response_level(params=self.params)
+        value2 = self.layer2.calculate_response_level(params=self.params, use_eeg2=True)
+        if value1 != None and value2 != None and self.winner == None:
 
             percentage = self.percentage_from_values(value1, value2)
             self.params.percentage = percentage
 
-            print 'value1: %f, value2: %f, percentage %f' % (value1, value2, percentage)
+            if self.params.debug == True:
+                NUM_PIXELS = 100
+                p1_chars = int(round(percentage * NUM_PIXELS)) * '*'
+                p2_chars = (NUM_PIXELS - len(p1_chars)) * '^'
+                bar = p1_chars + p2_chars
+
+                print 'value1: %f, value2: %f, percentage %f' % (value1, value2, percentage)
+                print '|'+bar+'|'
+
             #winner must 'win' for a certain amount of time to be legit
             if percentage == 0.0 or percentage == 1.0:
                 self.potential_winner = percentage
@@ -70,6 +84,6 @@ class GameObject(object):
             else:
                 self.potential_winner = None
             if self.potential_winner != None and (time.time() - self.win_time) > TIME_AT_MAX:
-                self.winner = 'one' if self.potential_winner == 0.0 else 'two'
+                self.winner = 'one' if self.potential_winner == 1.0 else 'two'
                 print 'winner is player %s' % self.winner   
                 # sys.exit(0)

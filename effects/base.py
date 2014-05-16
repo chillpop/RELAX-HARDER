@@ -56,7 +56,7 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
     """
     def __init__(self, respond_to, smooth_response_over_n_secs=0, minimum_response_level=None, inverse=False):
         # Name of the eeg field to influence this effect
-        if respond_to not in ('attention', 'meditation', 'percentage'):
+        if respond_to not in ('attention', 'meditation'):
             raise Exception('respond_to was "%s" -- should be "attention" or "meditation"'
                             % respond_to)
         self.respond_to = respond_to
@@ -81,11 +81,11 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
         self.last_response_level = self.fading_to
         self.fading_to = None
 
-    def render(self, params, frame):
+    def calculate_response_level(self, params, use_eeg2=False):
         now = time.time()
         response_level = None
         # Update our measurements, if we have a new one
-        eeg = params.eeg1
+        eeg = params.eeg2 if use_eeg2 else params.eeg1
         if eeg and eeg != self.last_eeg and eeg.on:
             if self.fading_to:
                 self.end_fade()
@@ -118,10 +118,12 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
 
         if response_level and self.inverse:
             response_level = 1 - response_level
-                    
+        return response_level
+
+    def render(self, params, frame):
+        response_level = self.calculate_response_level(params)
         if self.minimum_response_level == None or response_level >= self.minimum_response_level:
             self.render_responsive(params, frame, response_level)
-
 
     def render_responsive(self, params, frame, response_level):
         raise NotImplementedError(
