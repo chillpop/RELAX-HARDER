@@ -27,6 +27,8 @@ class SharedParameters(object):
     eeg1 = None
     eeg2 = None
     percentage = 0.5
+    brightness = 1.0
 
     debug = True
+    use_keyboard_input = True
     frames_to_average = 5

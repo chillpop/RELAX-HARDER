@@ -10,7 +10,16 @@ import sys
 import numpy
 import math
 import struct
-   
+import tty
+import select
+import termios
+
+def get_key_or_none():
+    c = None
+    if select.select([sys.stdin], [], [], 0.0001) == ([sys.stdin], [], []):
+        c = sys.stdin.read(1)
+    return c
+
 class AnimationController(object):
     """Manages the main animation loop. Each EffectLayer from the 'layers' list is run in order to
        produce a final frame of LED data which we send to the OPC server. This class manages frame
@@ -61,11 +70,25 @@ class AnimationController(object):
         # Log frame rate
 
         self._fpsFrames += 1
-        if now > self._fpsTime + self._fpsLogPeriod:
+        if self.params.debug and now > self._fpsTime + self._fpsLogPeriod:
             fps = self._fpsFrames / (now - self._fpsTime)
             self._fpsTime = now
             self._fpsFrames = 0
             sys.stderr.write("%7.2f FPS\n" % fps)
+
+    def checkInput(self):
+        if self.params.use_keyboard_input:
+            # http://stackoverflow.com/a/1450063
+            # poll for keyboard input
+            i,o,e = select.select([sys.stdin], [], [], 0)
+            if sys.stdin in i:
+                c = sys.stdin.read(1)
+                if c == 'w':
+                    self.params.brightness = min(1.0, self.params.brightness + 0.1)
+                elif c == 's':
+                    self.params.brightness = max(0.0, self.params.brightness - 0.1)
+                if self.params.debug:
+                    print 'brightness is now %f' % self.params.brightness
 
     def renderLayers(self):
         """Generate a complete frame of LED data by rendering each layer."""
@@ -75,6 +98,8 @@ class AnimationController(object):
         frame = numpy.zeros((self.params.num_pixels, 3))
 
         self.renderer.render(self.params, frame)
+        # adjust brightness
+        numpy.multiply(frame, self.params.brightness, frame)
         return frame
 
     def frameToHardwareFormat(self, frame):
@@ -88,6 +113,7 @@ class AnimationController(object):
     def drawFrame(self):
         """Render a frame and send it to the OPC server"""
         self.advanceTime()
+        self.checkInput()
         self.game_object.loop()
         pixels = self.renderLayers()
         self.frameToHardwareFormat(pixels)
@@ -95,12 +121,18 @@ class AnimationController(object):
 
     def drawingLoop(self):
         """Render frames forever or until keyboard interrupt"""
+        #save existing terminal settings
+        old_settings = termios.tcgetattr(sys.stdin)
         try:
+            if self.params.use_keyboard_input:
+                tty.setcbreak(sys.stdin.fileno())
             while True:
                 self.drawFrame()
         except KeyboardInterrupt:
             pass
-        
+        finally:
+            if self.params.use_keyboard_input:
+                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
         
 class FastOPC(object):
     """High-performance Open Pixel Control client, using Numeric Python.
