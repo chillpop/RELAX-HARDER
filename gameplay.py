@@ -58,6 +58,8 @@ class GameObject(object):
         self.layer2 = HeadsetResponsiveEffectLayer(respond_to=player_two_attr, 
                                                     smooth_response_over_n_secs=self.params.frames_to_average)
 
+        self.renderer_high.swapPlaylists(self.params.PLAY_STATE)
+        self.renderer_low.swapPlaylists(self.params.PLAY_STATE)
         self.params.percentage = 0.5
         self.start_time = time.time()
         self.win_time = None
@@ -114,7 +116,7 @@ class PercentageLayerMixer(EffectLayer):
             out_frame[:idx] = low_frame[:idx]
             # mix the pixel at the index based on the fractional value
             alpha = dividing_float - idx
-            out_frame[dividing_index] = (1 - alpha) * high_frame[idx] + alpha * low_frame[idx]
+            out_frame[idx] = (1 - alpha) * high_frame[idx] + alpha * low_frame[idx]
             idx += 1
             #everything above the index is high_frame
             out_frame[idx:] = high_frame[idx:]
@@ -145,6 +147,7 @@ class PercentageLayerMixer(EffectLayer):
                 out_frame[window_end:] = high_frame[window_end:]
             # print ' %d +- %d = %d => (%d - %d)' % (dividing_index, window_radius, window_length, window_start, window_end)
 
+
 class PercentageResponsiveEffectLayer(EffectLayer):
     """A layer effect that responds to the percentage of two MindWave headsets in some way.
 
@@ -170,25 +173,3 @@ class PercentageResponsiveEffectLayer(EffectLayer):
         raise NotImplementedError(
             "Implement render_responsive() in your PercentageResponsiveEffectLayer subclass")
 
-
-class ResponsiveRedVersusBlue(PercentageResponsiveEffectLayer):
-    def render_responsive(self, params, frame, response_level):
-        if response_level is None:
-            # No signal (blue)
-            frame[:] += [0.5, 0.5, 0.5]
-        else:
-            parts = divmod(len(frame) * response_level, 1.0)
-            dividing_pixel = int(parts[0])
-            remainder = parts[1]
-
-            window = 10
-
-            window_start = dividing_pixel - window
-            window_end = dividing_pixel + window + 1
-            frame[:window_start,2] += 1
-            alpha = 1.0 / (2*window + 1)
-            for idx in range(window_start, window_end):
-                value = alpha*(idx - window_start)
-                frame[idx] += [value, 0, 1-value]
-            # frame[dividing_pixel] += [1-remainder, 0, remainder]
-            frame[window_end:,0] += 1

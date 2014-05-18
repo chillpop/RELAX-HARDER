@@ -32,3 +32,9 @@ class SharedParameters(object):
     debug = True
     use_keyboard_input = True
     frames_to_average = 5
+
+    #game states
+    PLAY_STATE = 'regular_play'
+    NO_HEADSET_STATE = 'no_headset'
+    WIN_STATE = 'winner'
+    STARTUP_STATE = 'startup'
