@@ -89,6 +89,8 @@ class AnimationController(object):
                     self.params.brightness = min(1.0, self.params.brightness + 0.1)
                 elif c == 's':
                     self.params.brightness = max(0.0, self.params.brightness - 0.1)
+                elif c == 'r':
+                    self.game_object.start()
                 if self.params.debug:
                     print 'brightness is now %f' % self.params.brightness
 

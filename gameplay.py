@@ -58,6 +58,7 @@ class GameObject(object):
         self.layer2 = HeadsetResponsiveEffectLayer(respond_to=player_two_attr, 
                                                     smooth_response_over_n_secs=self.params.frames_to_average)
 
+        self.params.percentage = 0.5
         self.start_time = time.time()
         self.win_time = None
         self.potential_winner = None
