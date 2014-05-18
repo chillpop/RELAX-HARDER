@@ -108,7 +108,7 @@ class AnimationController(object):
         self.renderer_high.render(self.params, high_frame)
 
         #mix the frames together
-        self.layer_mixer.render(self.params, low_frame, high_frame, frame)
+        self.layer_mixer.render(self.params, low_frame, high_frame, frame, mix_radius=0)
 
         # adjust brightness
         numpy.multiply(frame, self.params.brightness, frame)

@@ -95,24 +95,32 @@ class GameObject(object):
 
 
 class PercentageLayerMixer(EffectLayer):
-    window_radius = 3
     """An effect layer that computes a composite of two frames based on the current percentage 
         in the shared parameters."""
-    def render(self, params, low_frame, high_frame, out_frame):
+    def render(self, params, low_frame, high_frame, out_frame, mix_radius=3):
         length = len(out_frame)
         max_index = length - 1
         dividing_float = params.percentage * length
         dividing_index = int(round(dividing_float))
+        mix_radius = max(mix_radius, 0)
         if params.percentage == 0.0:
             out_frame[:] = high_frame[:]
         elif dividing_index > max_index:
             out_frame[:] = low_frame[:]
-        else:
-            window_radius = PercentageLayerMixer.window_radius
+        elif mix_radius == 0:
+            # simple mixing over one pixel - smoother transitions between percentage levels
+            idx = int(math.floor(dividing_float))
+            #everything below the index is low_frame
+            out_frame[:idx] = low_frame[:idx]
+            # mix the pixel at the index based on the fractional value
+            alpha = dividing_float - idx
+            out_frame[dividing_index] = (1 - alpha) * high_frame[idx] + alpha * low_frame[idx]
+            idx += 1
+            #everything above the index is high_frame
+            out_frame[idx:] = high_frame[idx:]
 
-            # remainder = dividing_float - dividing_index
-            # dividing_index = max_index-1
-            # dividing_index = 1
+        else:
+            window_radius = mix_radius
 
             #shorten the window_radius if we're close to either end of the frame
             window_radius = min(window_radius, dividing_index)
