@@ -2,7 +2,7 @@
 
 from parameters import SharedParameters
 from renderer import Renderer
-from gameplay import GameObject
+from gameplay import GameObject, PercentageLayerMixer
 import os
 import socket
 import time
@@ -26,10 +26,12 @@ class AnimationController(object):
        rate control, and handles the advancement of time in EffectParameters.
        """
 
-    def __init__(self, game_object, renderer, params=None, server=None):
+    def __init__(self, game_object, renderer_low, renderer_high, params=None, server=None):
         self.opc = FastOPC(server)
         self.game_object = game_object
-        self.renderer = renderer
+        self.layer_mixer = PercentageLayerMixer()
+        self.renderer_low = renderer_low
+        self.renderer_high = renderer_high
         self.params = params or SharedParameters()
 
         self._fpsFrames = 0
@@ -97,7 +99,15 @@ class AnimationController(object):
         #       32-bit floats take a slower path in NumPy sadly.
         frame = numpy.zeros((self.params.num_pixels, 3))
 
-        self.renderer.render(self.params, frame)
+        low_frame = numpy.zeros((self.params.num_pixels, 3))
+        self.renderer_low.render(self.params, low_frame)
+        
+        high_frame = numpy.zeros((self.params.num_pixels, 3))
+        self.renderer_high.render(self.params, high_frame)
+
+        #mix the frames together
+        self.layer_mixer.render(self.params, low_frame, high_frame, frame)
+
         # adjust brightness
         numpy.multiply(frame, self.params.brightness, frame)
         return frame

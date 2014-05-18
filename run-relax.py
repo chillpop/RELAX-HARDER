@@ -10,7 +10,7 @@ from gameplay import GameObject, ResponsiveRedVersusBlue
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
-from effects.base import RGBLayer, TechnicolorSnowstormLayer, ResponsiveGreenHighRedLow
+from effects.base import RGBLayer, TechnicolorSnowstormLayer, WhiteOutLayer, ColorLayer
 
 PLAYER_ONE_ADDRESS = '74:E5:43:BE:39:71'
 PLAYER_ONE_COLOR = 255, 0, 0
@@ -36,13 +36,18 @@ if __name__ == '__main__':
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
     player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
 
-    effect_sequence = Playlist( [ 
-        [ResponsiveRedVersusBlue()] ] )
+    effect_sequence_low = Playlist( [ 
+        [ColorLayer([1., 0., 0.])] ] )
 
-    game = GameObject(shared_params)
+    effect_sequence_high = Playlist( [ 
+        [ColorLayer([0., 0., 1.])] ] )
+
+    renderer_low = Renderer({'relax_harder': effect_sequence_low})
+    renderer_high = Renderer({'relax_harder': effect_sequence_high})
+    game = GameObject(shared_params, renderer_low, renderer_high)
     game.start()
-    renderer = Renderer({'relax_harder': effect_sequence})
-    controller = AnimationController(game_object=game, renderer=renderer, params=shared_params, server=ip_address)
+    controller = AnimationController(game_object=game, 
+        renderer_low=renderer_low, renderer_high=renderer_high, params=shared_params, server=ip_address)
 
     threads = [
         HeadsetThread(shared_params, player1),        

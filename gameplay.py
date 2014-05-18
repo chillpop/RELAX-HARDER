@@ -5,6 +5,7 @@ import numpy
 import math
 from parameters import SharedParameters, EEGInfo
 from effects.base import EffectLayer, HeadsetResponsiveEffectLayer
+from renderer import Renderer
 
 MAX_DELTA = 1.0
 MIN_DELTA = 0.05
@@ -18,8 +19,10 @@ class GameObject(object):
     """
     Class to calculate the game between two headset players
         """
-    def __init__(self, params):
+    def __init__(self, params, renderer_low, renderer_high):
         self.params = params
+        self.renderer_low = renderer_low
+        self.renderer_high = renderer_high
 
         self.layer1 = None
         self.layer2 = None
@@ -89,6 +92,49 @@ class GameObject(object):
                 print 'winner is player %s' % self.winner   
                 # sys.exit(0)
 
+
+class PercentageLayerMixer(EffectLayer):
+    window_radius = 3
+    """An effect layer that computes a composite of two frames based on the current percentage 
+        in the shared parameters."""
+    def render(self, params, low_frame, high_frame, out_frame):
+        length = len(out_frame)
+        max_index = length - 1
+        dividing_float = params.percentage * length
+        dividing_index = int(round(dividing_float))
+        if params.percentage == 0.0:
+            out_frame[:] = high_frame[:]
+        elif dividing_index > max_index:
+            out_frame[:] = low_frame[:]
+        else:
+            window_radius = PercentageLayerMixer.window_radius
+
+            # remainder = dividing_float - dividing_index
+            # dividing_index = max_index-1
+            # dividing_index = 1
+
+            #shorten the window_radius if we're close to either end of the frame
+            window_radius = min(window_radius, dividing_index)
+            window_radius = min(window_radius, max_index - dividing_index)
+
+            #calculate start and end indices, making sure they don't go out of bounds
+            window_start = max(dividing_index - window_radius, 0)
+            #include an extra 1 in window_end to include the dividing index itself
+            window_end = min(dividing_index + window_radius, max_index) + 1
+            window_length = 2 * window_radius + 1
+            window_step = min(1.0 / window_length, 0.5)
+            alpha = window_step
+            #before window_start it is only values in the low_frame
+            if window_start > 0:
+                out_frame[:window_start] = low_frame[:window_start]
+            for idx in range (window_start, window_end):
+                out_frame[idx] += (1 - alpha) * low_frame[idx] + alpha * high_frame[idx]
+                # print alpha
+                alpha += window_step
+            #after window_end it is only values in the high_frame
+            if window_end < max_index:
+                out_frame[window_end:] = high_frame[window_end:]
+            # print ' %d +- %d = %d => (%d - %d)' % (dividing_index, window_radius, window_length, window_start, window_end)
 
 class PercentageResponsiveEffectLayer(EffectLayer):
     """A layer effect that responds to the percentage of two MindWave headsets in some way.

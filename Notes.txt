@@ -48,3 +48,11 @@ playlist
 	percentage effect (game play)
 	potential winning effect
 	winning effect
+
+
+Create an affect layer that combines two different layers by percentage with some amount of blending
+	may need to special case 0 and 100 percent to have no blending?
+
+create two renderers: one for high, one for low
+each gets its own frame to render to, then both are combined using a masking frame to provide blending
+game object is responsible for masking frame to allow it to adjust blending amount
