@@ -135,7 +135,7 @@ class HeadsetResponsiveEffectLayer(EffectLayer):
 ########################################################
 
 class ColorLayer(EffectLayer):
-    """Simplest layer, draws a static RGB color cube."""
+    """Simplest layer, draws a static RGB color"""
 
     def __init__(self, color):
         self.color = color
