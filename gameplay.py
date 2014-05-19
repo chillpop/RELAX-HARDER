@@ -27,6 +27,9 @@ class GameObject(object):
         self.layer1 = None
         self.layer2 = None
 
+        self.last_eeg1 = None
+        self.last_eeg2 = None
+
         self.start_time = None
         self.win_time = None
         self.potential_winner = None
@@ -57,16 +60,29 @@ class GameObject(object):
                                                     smooth_response_over_n_secs=self.params.frames_to_average)
         self.layer2 = HeadsetResponsiveEffectLayer(respond_to=player_two_attr, 
                                                     smooth_response_over_n_secs=self.params.frames_to_average)
-
-        self.renderer_high.swapPlaylists(self.params.PLAY_STATE)
-        self.renderer_low.swapPlaylists(self.params.PLAY_STATE)
+        self.last_eeg1 = None
+        self.last_eeg2 = None
+        self.renderer_high.swapPlaylists(self.params.NO_HEADSET_STATE, fadeTime=0.1)
+        self.renderer_low.swapPlaylists(self.params.NO_HEADSET_STATE, fadeTime=0.1)
         self.params.percentage = 0.5
         self.start_time = time.time()
         self.win_time = None
         self.potential_winner = None
         self.winner = None
 
+    def change_effects(self, renderer, eeg, last_eeg):
+        if eeg and eeg != last_eeg:
+            if not eeg or not eeg.on:
+                renderer.swapPlaylists(self.params.NO_HEADSET_STATE)
+            else:
+                renderer.swapPlaylists(self.params.PLAY_STATE)
+            last_eeg = eeg
+        return last_eeg
+
     def loop(self):
+        self.last_eeg1 = self.change_effects(self.renderer_low, self.params.eeg1, self.last_eeg1)
+        self.last_eeg2 = self.change_effects(self.renderer_high, self.params.eeg2, self.last_eeg2)
+
         value1 = self.layer1.calculate_response_level(params=self.params)
         value2 = self.layer2.calculate_response_level(params=self.params, use_eeg2=True)
         if value1 != None and value2 != None and self.winner == None:
@@ -94,7 +110,6 @@ class GameObject(object):
                 self.winner = 'one' if self.potential_winner == 1.0 else 'two'
                 print 'winner is player %s' % self.winner   
                 # sys.exit(0)
-
 
 class PercentageLayerMixer(EffectLayer):
     """An effect layer that computes a composite of two frames based on the current percentage 
