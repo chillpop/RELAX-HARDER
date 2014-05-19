@@ -11,9 +11,13 @@ from playlist import Playlist
 from effects.base import EffectLayer, RGBLayer, SnowstormLayer, TechnicolorSnowstormLayer, WhiteOutLayer, ColorLayer
 from gameplay import PercentageResponsiveEffectLayer
 
-def generate_player_renderer(params, color):
+def generate_player_renderer(params, color, inverse=False):
+    speed = -1.0
+    if inverse:
+        speed *= -1.0
     regular_play = Playlist([
-        [PulsingColorLayer(color, 1.0, 0.5, 1.0, random.random())]
+    	[VariableColorLayer(color, speed=speed)]
+        # [PulsingColorLayer(color, 1.0, 0.5, 1.0, random.random())]
         ])
 
     no_headset = Playlist([
@@ -24,14 +28,14 @@ def generate_player_renderer(params, color):
                 params.NO_HEADSET_STATE: no_headset}
     return Renderer(all_lists, activePlaylist=params.NO_HEADSET_STATE)
 
-def oscillating_value(input_value, rate_of_change, minimum, span, phase_shift):	
+def oscillating_value(input_value, rate_of_change, minimum, span, phase_shift=0.0):	
 	cycle = 2.0 * math.pi
 	radians = rate_of_change * cycle * input_value + (phase_shift * cycle)
 	scale = minimum + span * 0.5 * (math.cos(radians) + 1)
 	return scale
 
 class ColorSnowstormLayer(ColorLayer):
-	"""A color noise layer"""
+	# """A color noise layer"""
     def render(self, params, frame):
     	temp_frame = numpy.zeros_like(frame)
     	temp_frame[:] = self.color
@@ -66,3 +70,29 @@ class PulsingMultiplierLayer(EffectLayer):
 	def render(self, params, frame):
 		scale = oscillating_value(params.time, self.speed, self.minimum, self.span, self.phase_shift)
 		numpy.multiply(frame, scale, frame)
+
+class VariableColorLayer(ColorLayer):
+	def __init__(self, color, length_of_peak=20, speed=1.0, minimum=0.8, maximum=1.0):
+		super(VariableColorLayer,self).__init__(color)
+		self.color_frame = None
+		self.length_of_peak = length_of_peak
+		self.speed = speed
+		self.minimum = max(minimum, 0.0)
+		self.maximum = min(maximum, 1.0)
+		self.span = self.maximum - self.minimum
+
+	def create_color_frame(self, frame, phase_shift=0.0):
+		temp_frame = numpy.zeros_like(frame)
+		step = 1.0 / self.length_of_peak
+		for x in range(0, len(frame)):
+			scale = oscillating_value(x, step, self.minimum, self.span, phase_shift)
+			color_value = numpy.multiply(self.color, scale)
+			numpy.add(temp_frame[x], color_value, temp_frame[x])
+		return temp_frame
+
+	def render(self, params, frame):
+
+		self.color_frame = self.create_color_frame(frame, params.time * self.speed)
+
+		# numpy.roll(self.color_frame, int())
+		numpy.add(frame, self.color_frame, frame)
