@@ -81,7 +81,10 @@ class Renderer:
     def swapPlaylists(self, nextPlaylist, intermediatePlaylist=None, advanceAfterFadeOut=True, fadeTime=1):
         # Swap to a new playlist, either directly or by doing a two-step fade to an intermediate one first.
         # TODO check for wonky behavior when one fade is set while another is still in progress
-        
+        if self.activePlaylist == nextPlaylist or self.nextPlaylist == nextPlaylist:
+            #don't start a fade to the active play list or one that we're in the middle of fading to
+            return
+
         active = self._active()
         self.nextPlaylist = nextPlaylist
         
