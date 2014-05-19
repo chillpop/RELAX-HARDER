@@ -29,7 +29,7 @@ class SharedParameters(object):
     percentage = 0.5
     brightness = 1.0
 
-    debug = True
+    debug = False#True
     use_keyboard_input = True
     frames_to_average = 5
 
