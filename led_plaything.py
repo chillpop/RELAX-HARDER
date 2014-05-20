@@ -3,6 +3,7 @@
 # Experimental LED effects code for MensAmplio
 
 import sys
+import copy
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
@@ -10,6 +11,7 @@ from effects.base import *
 from effects.drifters import *
 from effects.impulses import *
 from parameters import SharedParameters
+from gameplay import *
 from game_effects import *
 import colorsys
 
@@ -33,6 +35,8 @@ if __name__ == '__main__':
         return colorsys.hsv_to_rgb(random.random(),1,1)
 
     playlist = Playlist([
+        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], speed_low=5.0, speed_high=0.5) ],
+        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], speed_low=-5.0, speed_high=-0.5, inverse=True) ],
         [ WhiteOutLayer() ],
         [ RGBLayer() ],
         [ SnowstormLayer() ],
@@ -40,13 +44,16 @@ if __name__ == '__main__':
         [ ColorSnowstormLayer(random_color()) ],
         [ PulsingColorLayer(random_color()) ],
         [ PulsingColorLayer(random_color(), speed=2.0) ],
-        [ VariableColorLayer(random_color(), speed=0) ],
-        [ VariableColorLayer(random_color(), speed=5, length_of_peak=10) ],
-        [ VariableColorLayer(random_color(), speed=1) ],
-        [ VariableColorLayer(random_color(), speed=-1) ],
-        [ VariableColorLayer(random_color(), speed=-2.5, length_of_peak=30, minimum=0.5) ],
+        [ OscillatingColorLayer(random_color(), speed=0) ],
+        [ OscillatingColorLayer(random_color(), speed=5, length_of_peak=10) ],
+        [ OscillatingColorLayer([0., 0., 1.], speed=1) ],
+        [ OscillatingColorLayer([0., 0., 1.], speed=2) ],
+        [ OscillatingColorLayer([0., 0., 1.], speed=3) ],
+        [ OscillatingColorLayer(random_color(), speed=1) ],
+        [ OscillatingColorLayer(random_color(), speed=-1) ],
+        [ OscillatingColorLayer(random_color(), speed=-2.5, length_of_peak=30, minimum=0.5) ],
         [ ColorSnowstormLayer(random_color()), 
-            VariableColorLayer(random_color(), minimum=0.2), 
+            OscillatingColorLayer(random_color(), minimum=0.2), 
             PulsingMultiplierLayer()],
         ])
 
@@ -60,7 +67,8 @@ if __name__ == '__main__':
     shared_params.targetFrameRate = 100.0;
 
     renderer = Renderer(playlists={'all': playlist}, gamma=2.2)
-    controller = SimpleController(renderer_low=renderer, params=shared_params, server=ip_address, 
-        game_object=None, renderer_high=None)
+    renderer_high = Renderer(playlists={'all': copy.copy(playlist)}, gamma=2.2)
+    controller = AnimationController(renderer_low=renderer, params=shared_params, server=ip_address, 
+        game_object=None, renderer_high=renderer_high)
     controller.drawingLoop()
 
