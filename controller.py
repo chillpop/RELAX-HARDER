@@ -91,10 +91,14 @@ class AnimationController(object):
                     self.params.brightness = max(0.0, self.params.brightness - 0.1)
                 elif c == 'r' and self.game_object != None:
                     self.game_object.start()
-                elif c == ' ' and self.renderer_low != None:
+                elif c == 'z' and self.renderer_low != None:
                     self.renderer_low.advanceCurrentPlaylist()
-                if self.params.debug:
-                    print 'brightness is now %f' % self.params.brightness
+                elif c == 'x' and self.renderer_high != None:
+                    self.renderer_high.advanceCurrentPlaylist()
+                elif c == ']' and self.game_object == None:
+                    self.params.percentage = min(self.params.percentage + 0.1, 1.0)
+                elif c == '[' and self.game_object == None:
+                    self.params.percentage = max(self.params.percentage - 0.1, 0.0)
 
     def renderLayers(self):
         """Generate a complete frame of LED data by rendering each layer."""
@@ -128,7 +132,8 @@ class AnimationController(object):
         """Render a frame and send it to the OPC server"""
         self.advanceTime()
         self.checkInput()
-        self.game_object.loop()
+        if self.game_object != None:
+            self.game_object.loop()
         pixels = self.renderLayers()
         self.frameToHardwareFormat(pixels)
         self.opc.putPixels(0, pixels)
