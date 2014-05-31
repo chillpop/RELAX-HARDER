@@ -12,11 +12,11 @@ from effects.base import EffectLayer, RGBLayer, SnowstormLayer, TechnicolorSnows
 from gameplay import PercentageResponsiveEffectLayer
 
 def generate_player_renderer(params, color, inverse=False):
-    speed = -1.0
+    speed = 1.0
     if inverse:
         speed *= -1.0
     hsv = colorsys.rgb_to_hsv(color[0], color[1], color[2])
-    similar_color = colorsys.hsv_to_rgb(hsv[0] + 0.2, hsv[1], hsv[2])
+    similar_color = colorsys.hsv_to_rgb(hsv[0] + 0.15, hsv[1], hsv[2])
     regular_play = Playlist([
         [OscillatingSpeedResponsiveTwoColorLayer(color, similar_color, inverse=inverse)]
     	#[OscillatingColorLayer(color, speed=speed)]
@@ -24,7 +24,7 @@ def generate_player_renderer(params, color, inverse=False):
         ])
 
     no_headset = Playlist([
-        [ColorSnowstormLayer(color)]
+        [ColorSnowstormLayer(color), ColorSnowstormLayer(similar_color)]
         ])
 
     all_lists = {params.PLAY_STATE: regular_play,
