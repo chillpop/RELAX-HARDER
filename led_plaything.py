@@ -35,8 +35,8 @@ if __name__ == '__main__':
         return colorsys.hsv_to_rgb(random.random(),1,1)
 
     playlist = Playlist([
-        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], speed_low=5.0, speed_high=0.5) ],
-        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], speed_low=-5.0, speed_high=-0.5, inverse=True) ],
+        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5]) ],
+        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], inverse=True) ],
         [ WhiteOutLayer() ],
         [ RGBLayer() ],
         [ SnowstormLayer() ],
