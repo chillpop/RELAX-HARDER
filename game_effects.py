@@ -122,17 +122,23 @@ class OscillatingTwoColorLayer(EffectLayer):
 
 
 class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
-    def __init__(self, color_one, color_two, length_of_peak=20, speed_low=3.0, speed_high=1.0, inverse=False):
+    def __init__(self, color_one, color_two, length_of_peak=20, speed_low=3.5, speed_high=0.2, inverse=False):
         super(OscillatingSpeedResponsiveTwoColorLayer,self).__init__(
-            color_one, color_two, length_of_peak, 1.0)
-        self.speed_low = speed_high
-        self.span = speed_low - speed_high
+            color_one, color_two, length_of_peak)
+        self.speed_low = speed_high # 1.0 default
+        self.span = speed_low - speed_high # 3.0 - 1.0 = 2.0 => range is (1.0 - 3.0)
         if inverse:
-            self.speed_low = speed_low
-            self.span = speed_high - speed_low
+            self.speed_low = -speed_low # -3.0 default
+            #span is the same so range is (-3.0 - -1.0)
+        self.speed = self.speed_low + 0.5 * self.span
+        self.last_phase = 0.0
 
     def render(self, params, frame):
-        # percentage = 
-        alpha = round(params.percentage, 2)
+        alpha = params.percentage
         self.speed = self.speed_low + alpha * self.span
-        super(OscillatingSpeedResponsiveTwoColorLayer,self).render(params, frame)
+        phase = self.last_phase + params.delta_t * self.speed
+        
+        self.last_phase = phase
+        self.color_frame = self.create_two_color_frame(frame, phase)
+        numpy.add(frame, self.color_frame, frame)
+
