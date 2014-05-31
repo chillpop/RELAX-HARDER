@@ -59,13 +59,14 @@ class AnimationController(object):
             # skipping badly. Jump immediately to the current time and don't look back.
 
             self.params.time = now
-
+            self.params.delta_t = dt
         else:
             # We're approximately keeping up with our ideal frame rate. Advance our animation
             # clock by the ideal amount, and insert delays where necessary so we line up the
             # animation clock with the real-time clock.
 
             self.params.time += dtIdeal
+            self.params.delta_t = dtIdeal
             if dt < dtIdeal:
                 time.sleep(dtIdeal - dt)
 

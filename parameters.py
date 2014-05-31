@@ -23,6 +23,7 @@ class SharedParameters(object):
        """
     num_pixels = 120
     time = 0
+    delta_t = 0
     targetFrameRate = 59.0     # XXX: Want to go higher, but gl_server can't keep up!
     eeg1 = None
     eeg2 = None
