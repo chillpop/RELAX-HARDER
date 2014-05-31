@@ -96,9 +96,9 @@ class AnimationController(object):
                 elif c == 'x' and self.renderer_high != None:
                     self.renderer_high.advanceCurrentPlaylist()
                 elif c == ']' and self.game_object == None:
-                    self.params.percentage = min(self.params.percentage + 0.1, 1.0)
+                    self.params.percentage = min(self.params.percentage + 0.01, 1.0)
                 elif c == '[' and self.game_object == None:
-                    self.params.percentage = max(self.params.percentage - 0.1, 0.0)
+                    self.params.percentage = max(self.params.percentage - 0.01, 0.0)
 
     def renderLayers(self):
         """Generate a complete frame of LED data by rendering each layer."""
