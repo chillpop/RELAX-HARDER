@@ -1,6 +1,0 @@
-#!/bin/sh
-DIRNAME="`dirname "$0"`"
-cd "$DIRNAME"
-
-modprobe uio_pruss
-./opc-rx -p 7890 -c 120
