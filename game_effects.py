@@ -122,7 +122,7 @@ class OscillatingTwoColorLayer(EffectLayer):
 
 
 class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
-    def __init__(self, color_one, color_two, length_of_peak=20, speed_low=3.5, speed_high=0.2, inverse=False):
+    def __init__(self, color_one, color_two, length_of_peak=20, speed_low=3.5, speed_high=0.25, inverse=False):
         super(OscillatingSpeedResponsiveTwoColorLayer,self).__init__(
             color_one, color_two, length_of_peak)
         self.speed_low = speed_high # 1.0 default
