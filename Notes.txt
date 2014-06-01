@@ -43,11 +43,12 @@ adjust rules based on switch??
 
 
 playlist
-	waiting to connect
-	countdown to begin
-	percentage effect (game play)
-	potential winning effect
-	winning effect
+	waiting to connect - white snowstorm
+	both connected - solid white
+	countdown to begin - color ready, set, go?
+	percentage effect (game play) - speed dependent oscillating two colors
+	(potential winning effect)
+	winning effect - winning player's two color snowstorm
 
 
 Create an affect layer that combines two different layers by percentage with some amount of blending
