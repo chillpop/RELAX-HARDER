@@ -12,23 +12,28 @@ from effects.base import EffectLayer, RGBLayer, SnowstormLayer, TechnicolorSnows
 from gameplay import PercentageResponsiveEffectLayer
 
 def generate_player_renderer(params, color, inverse=False):
-    speed = 1.0
-    if inverse:
-        speed *= -1.0
     hsv = colorsys.rgb_to_hsv(color[0], color[1], color[2])
     similar_color = colorsys.hsv_to_rgb(hsv[0] + 0.15, hsv[1], hsv[2])
     regular_play = Playlist([
         [OscillatingSpeedResponsiveTwoColorLayer(color, similar_color, inverse=inverse)]
-    	#[OscillatingColorLayer(color, speed=speed)]
-        # [PulsingColorLayer(color, 1.0, 0.5, 1.0, random.random())]
         ])
 
     no_headset = Playlist([
+        [SnowstormLayer()]
+        ])
+
+    winner = Playlist([
         [ColorSnowstormLayer(color), ColorSnowstormLayer(similar_color)]
         ])
 
+    countdown = Playlist([
+        [WhiteOutLayer()]
+        ])
+
     all_lists = {params.PLAY_STATE: regular_play,
-                params.NO_HEADSET_STATE: no_headset}
+                params.NO_HEADSET_STATE: no_headset,
+                params.WIN_STATE: winner,
+                params.STARTUP_STATE: countdown}
     return Renderer(all_lists, activePlaylist=params.NO_HEADSET_STATE)
 
 def oscillating_value(input_value, rate_of_change, minimum, span, phase_shift=0.0):	
@@ -125,11 +130,10 @@ class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
     def __init__(self, color_one, color_two, length_of_peak=20, speed_low=3.5, speed_high=0.25, inverse=False):
         super(OscillatingSpeedResponsiveTwoColorLayer,self).__init__(
             color_one, color_two, length_of_peak)
-        self.speed_low = speed_high # 1.0 default
-        self.span = speed_low - speed_high # 3.0 - 1.0 = 2.0 => range is (1.0 - 3.0)
+        self.speed_low = speed_high
+        self.span = speed_low - speed_high
         if inverse:
-            self.speed_low = -speed_low # -3.0 default
-            #span is the same so range is (-3.0 - -1.0)
+            self.speed_low = -speed_low
         self.speed = self.speed_low + 0.5 * self.span
         self.last_phase = 0.0
 
