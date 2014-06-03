@@ -13,6 +13,7 @@ import struct
 import tty
 import select
 import termios
+import Adafruit_BBIO.GPIO as GPIO
 
 def get_key_or_none():
     c = None
@@ -37,6 +38,8 @@ class AnimationController(object):
         self._fpsFrames = 0
         self._fpsTime = 0
         self._fpsLogPeriod = 0.5    # How often to log frame rate
+
+        self.button_down_start = None
 
     def advanceTime(self):
         """Update the timestep in EffectParameters.
@@ -80,6 +83,23 @@ class AnimationController(object):
             sys.stderr.write("%7.2f FPS\n" % fps)
 
     def checkInput(self):
+        seconds_to_hold_button = 5.0
+        if GPIO.event_detected(self.params.button_pin):
+            if GPIO.input(self.params.button_pin):
+                print 'button down'
+                self.button_down_start = self.params.time
+            else :
+                print 'button up'
+                self.button_down_start = None
+
+        if self.button_down_start != None:
+            delta_t = self.params.time - self.button_down_start
+            if delta_t > seconds_to_hold_button:
+                print 'you held the button for %.2f seconds' % delta_t
+                self.button_down_start = None
+                if self.game_object != None:
+                    self.game_object.start()
+
         if self.params.use_keyboard_input:
             # http://stackoverflow.com/a/1450063
             # poll for keyboard input

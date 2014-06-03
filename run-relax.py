@@ -11,7 +11,7 @@ from game_effects import generate_player_renderer
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
-from effects.base import RGBLayer, TechnicolorSnowstormLayer, WhiteOutLayer, ColorLayer
+import Adafruit_BBIO.GPIO as GPIO
 
 PLAYER_ONE_ADDRESS = '74:E5:43:BE:39:71'
 PLAYER_ONE_COLOR = [1., 0., 0.]
@@ -33,6 +33,9 @@ if __name__ == '__main__':
         shared_params.targetFrameRate = 100.0
         shared_params.use_keyboard_input = False
     # shared_params.debug = False
+
+    GPIO.setup(shared_params.button_pin, GPIO.IN)
+    GPIO.add_event_detect(shared_params.button_pin, GPIO.BOTH)
 
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
     player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)

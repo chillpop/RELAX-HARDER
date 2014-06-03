@@ -34,6 +34,8 @@ class SharedParameters(object):
     use_keyboard_input = True
     frames_to_average = 5
 
+    button_pin = "P8_12"
+
     #game states
     PLAY_STATE = 'regular_play'
     NO_HEADSET_STATE = 'no_headset'
