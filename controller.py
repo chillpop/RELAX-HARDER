@@ -83,7 +83,7 @@ class AnimationController(object):
             sys.stderr.write("%7.2f FPS\n" % fps)
 
     def checkInput(self):
-        seconds_to_hold_button = 5.0
+        seconds_to_hold_button = 2.0
         if GPIO.event_detected(self.params.button_pin):
             if GPIO.input(self.params.button_pin):
                 print 'button down'
