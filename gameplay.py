@@ -12,7 +12,6 @@ MIN_DELTA = 0.05
 CHANGE_IN_DELTA_PER_SECOND = 0.0025
 ELAPSED_STARTUP_TIME = 2.0
 TIME_AT_MAX = 3.0
-COUNTDOWN_TIME = 5.0
 
 DEFAULT_ATTRIBUTE = 'meditation'
 
@@ -67,7 +66,7 @@ class GameObject(object):
         self.last_eeg2 = None
         self.renderer_high.swapPlaylists(self.params.STARTUP_STATE, fadeTime=0.1)
         self.renderer_low.swapPlaylists(self.params.STARTUP_STATE, fadeTime=0.1)
-        self.params.percentage = 1.0
+        self.params.percentage = 0.5
         self.start_time = time.time()
         self.win_time = None
         self.potential_winner = None
@@ -90,7 +89,7 @@ class GameObject(object):
 
     def loop(self):
         if self.counting_down_to_start:
-            if self.params.time - self.start_time < COUNTDOWN_TIME:
+            if self.params.time - self.start_time < self.params.COUNTDOWN_TIME:
                 return
             else:
                 self.begin_gameplay()
