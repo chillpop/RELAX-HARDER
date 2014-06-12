@@ -26,8 +26,12 @@ def generate_player_renderer(params, color, inverse=False):
         [TwoColorSnowstormLayer(color, similar_color)]
         ])
 
+    #make a countdown mixer layer that performs an animating wipe from one effect to another
+    #wipe between regular gameplay effect and winning effect?
     countdown = Playlist([
-        [WhiteOutLayer()]
+        [AnimatingWipeTransition(TwoColorSnowstormLayer(color, similar_color), 
+            OscillatingSpeedResponsiveTwoColorLayer(color, similar_color, inverse=inverse),
+            params.COUNTDOWN_TIME, inverse=(not inverse))]
         ])
 
     all_lists = {params.PLAY_STATE: regular_play,
@@ -162,3 +166,64 @@ class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
         self.color_frame = self.create_two_color_frame(frame, phase)
         numpy.add(frame, self.color_frame, frame)
 
+class AnimatingWipeTransition(EffectLayer):
+    def __init__(self, start_effect, end_effect, duration, inverse=False, start_alpha=0.0, end_alpha=0.5):
+        self.start_effect = start_effect
+        self.end_effect = end_effect
+        self.duration = duration
+        self.inverse = inverse
+        self.start_alpha = start_alpha
+        self.end_alpha = end_alpha
+        self.alpha_span = end_alpha - start_alpha
+        if inverse:
+            # 0 - .5 => 1 - .5 span .5 => -.5
+            # .2 - .7 => .8 - .3 span .5 => -.5
+            self.start_alpha = 1.0 - start_alpha
+            self.alpha_span = -self.alpha_span
+            self.start_effect = end_effect
+            self.end_effect = start_effect
+            #inverse should transition from 
+        self.start_time = None
+        self.end_time = None
+        self.last_time = None
+        self.current_alpha = self.start_alpha
+
+    def render(self, params, frame):
+        #should we start or start over?
+        if self.start_time == None or self.last_time + params.delta_t < params.time:
+            self.start_time = params.time
+            self.end_time = params.time + self.duration
+            self.current_alpha = self.start_alpha
+        elapsed_time = (params.time - self.start_time) / self.duration
+        alpha = self.start_alpha + elapsed_time * self.alpha_span
+        if elapsed_time > 1.0:
+            alpha = self.start_alpha + self.alpha_span
+
+        #remember the last time here so we can tell when we should start over
+        self.last_time = params.time
+
+        if alpha == 0.0:
+            self.start_effect.safely_render(params, frame)
+        elif alpha == 1.0:
+            self.end_effect.safely_render(params, frame)
+        else:
+            #render alpha amount of start effect and (1 - alpha) of end effect
+            dividing_float = alpha * len(frame)
+
+            # simple mixing over one pixel
+            idx = int(math.floor(dividing_float))
+            # print idx
+            #make a low frame for start_effect to render into
+            # end_idx = min(idx + 1, len(frame) - 1)
+            low_frame = frame[:idx]
+            high_frame = frame[idx:]
+
+            self.end_effect.safely_render(params, low_frame)
+            # low_pixel = frame[idx]
+            # frame[idx] = [0., 0., 0.]
+            self.start_effect.safely_render(params, high_frame)
+            # high_pixel = frame[idx]
+
+            # # mix the pixel at the index based on the fractional value
+            # mix_alpha = dividing_float - idx
+            # frame[idx] = (1 - mix_alpha) * high_pixel + alpha * low_pixel
