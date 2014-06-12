@@ -23,7 +23,7 @@ def generate_player_renderer(params, color, inverse=False):
         ])
 
     winner = Playlist([
-        [ColorSnowstormLayer(color), ColorSnowstormLayer(similar_color)]
+        [TwoColorSnowstormLayer(color, similar_color)]
         ])
 
     countdown = Playlist([
@@ -47,7 +47,23 @@ class ColorSnowstormLayer(ColorLayer):
     def render(self, params, frame):
     	temp_frame = numpy.zeros_like(frame)
     	temp_frame[:] = self.color
-    	numpy.multiply(temp_frame, numpy.random.rand(params.num_pixels, 1), temp_frame)
+    	numpy.multiply(temp_frame, numpy.random.rand(len(frame), 1), temp_frame)
+        numpy.add(frame, temp_frame, frame)
+
+class TwoColorSnowstormLayer(ColorLayer):
+    # """A color noise layer"""
+    def __init__(self, color, other_color):
+        super(TwoColorSnowstormLayer,self).__init__(color)
+        self.other_color = other_color
+
+    def render(self, params, frame):
+        temp_frame = numpy.zeros_like(frame)
+        temp_frame[:] = self.color
+        numpy.multiply(temp_frame, numpy.random.rand(len(frame), 1), temp_frame)
+        numpy.add(frame, temp_frame, frame)
+
+        temp_frame[:] = self.other_color
+        numpy.multiply(temp_frame, numpy.random.rand(len(frame), 1), temp_frame)
         numpy.add(frame, temp_frame, frame)
 
 class PulsingColorLayer(ColorLayer):
