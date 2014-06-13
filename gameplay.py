@@ -93,13 +93,15 @@ class GameObject(object):
                 return
             else:
                 self.begin_gameplay()
+        elif self.winner != None:
+            return
 
         self.last_eeg1 = self.change_effects(self.renderer_low, self.params.eeg1, self.last_eeg1)
         self.last_eeg2 = self.change_effects(self.renderer_high, self.params.eeg2, self.last_eeg2)
 
         value1 = self.layer1.calculate_response_level(params=self.params)
         value2 = self.layer2.calculate_response_level(params=self.params, use_eeg2=True)
-        if value1 != None and value2 != None and self.winner == None:
+        if value1 != None and value2 != None:
 
             percentage = self.percentage_from_values(value1, value2)
             self.params.percentage = percentage
