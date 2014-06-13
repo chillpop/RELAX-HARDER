@@ -32,9 +32,9 @@ class SharedParameters(object):
 
     COUNTDOWN_TIME = 5.0
 
-    debug = False#True
+    debug = False
     use_keyboard_input = True
-    frames_to_average = 5
+    frames_to_average = 3
 
     button_pin = "P8_12"
 
