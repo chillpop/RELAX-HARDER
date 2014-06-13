@@ -13,6 +13,11 @@ CHANGE_IN_DELTA_PER_SECOND = 0.0025
 ELAPSED_STARTUP_TIME = 2.0
 TIME_AT_MAX = 3.0
 
+STATE_WAITING = 0
+STATE_COUNTDOWN = 1
+STATE_PLAYING = 2
+STATE_WINNER = 3
+
 DEFAULT_ATTRIBUTE = 'meditation'
 
 class GameObject(object):
@@ -34,8 +39,7 @@ class GameObject(object):
         self.win_time = None
         self.potential_winner = None
         self.winner = None
-
-        self.counting_down_to_start = False
+        self.game_state = STATE_WAITING
 
     def percentage_from_values(self, value1, value2):
         def delta_needed_to_win():
@@ -64,19 +68,23 @@ class GameObject(object):
                                                     smooth_response_over_n_secs=self.params.frames_to_average)
         self.last_eeg1 = None
         self.last_eeg2 = None
-        self.renderer_high.swapPlaylists(self.params.STARTUP_STATE, fadeTime=0.1)
-        self.renderer_low.swapPlaylists(self.params.STARTUP_STATE, fadeTime=0.1)
+        self.change_playlist(self.params.NO_HEADSET_STATE)
         self.params.percentage = 0.5
         self.start_time = time.time()
         self.win_time = None
         self.potential_winner = None
         self.winner = None
-        self.counting_down_to_start = True
+        self.game_state = STATE_WAITING
+
+    def begin_countdown(self):
+        self.game_state = STATE_COUNTDOWN
+        self.change_playlist(self.params.STARTUP_STATE, 0.5)
+        self.start_time = time.time()
 
     def begin_gameplay(self):
-        self.counting_down_to_start = False
         self.params.percentage = 0.5
         self.start_time = self.params.time
+        self.game_state = STATE_PLAYING
 
     def change_effects(self, renderer, eeg, last_eeg):
         if eeg and eeg != last_eeg:
@@ -87,13 +95,24 @@ class GameObject(object):
             last_eeg = eeg
         return last_eeg
 
+    def change_playlist(self, playlist, fadeTime=0.1):
+        self.renderer_low.swapPlaylists(playlist, fadeTime=fadeTime)
+        self.renderer_high.swapPlaylists(playlist, fadeTime=fadeTime)
+
     def loop(self):
-        if self.counting_down_to_start:
+        # TODO: don't start the countdown until we know that both headsets are connected and giving good data
+        if self.game_state == STATE_WAITING:
+            def valid_eeg(eeg):
+                return eeg and eeg.on
+            if valid_eeg(self.params.eeg1) and valid_eeg(self.params.eeg2):
+                self.begin_countdown()
+            return
+        elif self.game_state == STATE_COUNTDOWN:
             if self.params.time - self.start_time < self.params.COUNTDOWN_TIME:
                 return
             else:
                 self.begin_gameplay()
-        elif self.winner != None:
+        elif self.game_state == STATE_WINNER:
             return
 
         self.last_eeg1 = self.change_effects(self.renderer_low, self.params.eeg1, self.last_eeg1)
@@ -126,8 +145,9 @@ class GameObject(object):
             if self.potential_winner != None and (self.params.time - self.win_time) > TIME_AT_MAX:
                 self.winner = 'one' if self.potential_winner == 1.0 else 'two'
                 print 'winner is player %s' % self.winner
-                self.renderer_low.swapPlaylists(self.params.WIN_STATE, fadeTime=0.1)
-                self.renderer_high.swapPlaylists(self.params.WIN_STATE, fadeTime=0.1)
+
+                self.change_playlist(self.params.WIN_STATE)
+                self.game_state = STATE_WINNER
                 # sys.exit(0)
 
 class PercentageLayerMixer(EffectLayer):
