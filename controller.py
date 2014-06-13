@@ -45,8 +45,8 @@ class AnimationController(object):
         self._fpsLogPeriod = 0.5    # How often to log frame rate
 
         if GPIO != None:
-            GPIO.setup(shared_params.button_pin, GPIO.IN)
-            GPIO.add_event_detect(shared_params.button_pin, GPIO.BOTH)
+            GPIO.setup(self.params.button_pin, GPIO.IN)
+            GPIO.add_event_detect(self.params.button_pin, GPIO.BOTH)
             self.button_down_start = None
 
     def advanceTime(self):
