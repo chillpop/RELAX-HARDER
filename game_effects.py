@@ -213,7 +213,7 @@ class AnimatingWipeTransition(EffectLayer):
             # print idx
             #make a low frame for start_effect to render into
             # end_idx = min(idx + 1, len(frame) - 1)
-            low_frame = frame[:idx]
+            low_frame = frame[:idx+1]
             high_frame = frame[idx:]
 
             self.end_effect.safely_render(params, low_frame)
