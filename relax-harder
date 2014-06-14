@@ -1,0 +1,5 @@
+#!/bin/sh
+DIRNAME="`dirname "$0"`"
+cd "$DIRNAME"
+
+python run-relax.py
