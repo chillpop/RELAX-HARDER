@@ -32,7 +32,7 @@ class SharedParameters(object):
 
     COUNTDOWN_TIME = 5.0
 
-    debug = False
+    debug = True
     use_keyboard_input = True
     frames_to_average = 3
 

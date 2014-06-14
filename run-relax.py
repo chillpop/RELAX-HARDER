@@ -31,7 +31,7 @@ if __name__ == '__main__':
     if not test:
         shared_params.targetFrameRate = 100.0
         shared_params.use_keyboard_input = False
-    # shared_params.debug = False
+        shared_params.debug = False
 
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
     player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
