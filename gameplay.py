@@ -125,14 +125,14 @@ class GameObject(object):
             percentage = self.percentage_from_values(value1, value2)
             self.params.percentage = percentage
 
-            if self.params.debug == True:
-                NUM_PIXELS = 100
-                p1_chars = int(round(percentage * NUM_PIXELS)) * '*'
-                p2_chars = (NUM_PIXELS - len(p1_chars)) * '^'
-                bar = p1_chars + p2_chars
+            # if self.params.debug == True:
+            #     NUM_PIXELS = 100
+            #     p1_chars = int(round(percentage * NUM_PIXELS)) * '*'
+            #     p2_chars = (NUM_PIXELS - len(p1_chars)) * '^'
+            #     bar = p1_chars + p2_chars
 
-                print 'value1: %f, value2: %f, percentage %f' % (value1, value2, percentage)
-                print '|'+bar+'|'
+            #     print 'value1: %f, value2: %f, percentage %f' % (value1, value2, percentage)
+            #     print '|'+bar+'|'
 
             #winner must 'win' for a certain amount of time to be legit
             if percentage == 0.0 or percentage == 1.0:
