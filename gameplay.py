@@ -8,10 +8,11 @@ from effects.base import EffectLayer, HeadsetResponsiveEffectLayer
 from renderer import Renderer
 
 MAX_DELTA = 1.0
-MIN_DELTA = 0.05
-CHANGE_IN_DELTA_PER_SECOND = 0.0025
+MIN_DELTA = 0.02
+MAX_GAME_LENGTH = 6 * 60 
+CHANGE_IN_DELTA_PER_SECOND = (MAX_DELTA - MIN_DELTA) / MAX_GAME_LENGTH
 ELAPSED_STARTUP_TIME = 2.0
-TIME_AT_MAX = 3.0
+TIME_AT_MAX = 2.0
 
 STATE_WAITING = 0
 STATE_COUNTDOWN = 1
@@ -75,16 +76,19 @@ class GameObject(object):
         self.potential_winner = None
         self.winner = None
         self.game_state = STATE_WAITING
+        print 'waiting'
 
     def begin_countdown(self):
         self.game_state = STATE_COUNTDOWN
         self.change_playlist(self.params.STARTUP_STATE, 0.5)
         self.start_time = time.time()
+        print 'counting down'
 
     def begin_gameplay(self):
         self.params.percentage = 0.5
         self.start_time = self.params.time
         self.game_state = STATE_PLAYING
+        print 'playing'
 
     def change_effects(self, renderer, eeg, last_eeg):
         if eeg and eeg != last_eeg:
