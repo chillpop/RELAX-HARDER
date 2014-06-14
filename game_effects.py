@@ -124,26 +124,24 @@ class OscillatingColorLayer(ColorLayer):
 
 class OscillatingTwoColorLayer(EffectLayer):
     def __init__(self, color_one, color_two, length_of_peak=20, speed=1.0):
-        self.color_one = color_one
-        self.color_two = color_two
+        self.color_one = numpy.array(color_one)
+        self.color_two = numpy.array(color_two)
         self.color_frame = None
         self.length_of_peak = length_of_peak
         self.speed = speed
 
     def create_two_color_frame(self, frame, phase_shift=0.0):
-        temp_frame = numpy.zeros_like(frame)
+        temp_frame = numpy.zeros((self.length_of_peak, 3))
         step = 1.0 / self.length_of_peak
-        for x in range(0, len(frame)):
+        for x in range(0, self.length_of_peak):
             scale = oscillating_value(x, step, 0.0, 1.0, phase_shift)
-            color_value_one = numpy.multiply(self.color_one, scale)
-            color_value_two = numpy.multiply(self.color_two, 1.0 - scale)
-            color_value = numpy.add(color_value_one, color_value_two)
-            numpy.add(temp_frame[x], color_value, temp_frame[x])
+            color_value = self.color_one * scale + self.color_two * (1.0 - scale)
+            temp_frame[x] = color_value
         return temp_frame
 
     def render(self, params, frame):
         self.color_frame = self.create_two_color_frame(frame, params.time * self.speed)
-        numpy.add(frame, self.color_frame, frame)
+        numpy.add(frame, numpy.resize(self.color_frame, frame.shape), frame)
 
 
 class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
@@ -164,7 +162,7 @@ class OscillatingSpeedResponsiveTwoColorLayer(OscillatingTwoColorLayer):
         
         self.last_phase = phase
         self.color_frame = self.create_two_color_frame(frame, phase)
-        numpy.add(frame, self.color_frame, frame)
+        numpy.add(frame, numpy.resize(self.color_frame, frame.shape), frame)
 
 class AnimatingWipeTransition(EffectLayer):
     def __init__(self, start_effect, end_effect, duration, inverse=False, start_alpha=0.0, end_alpha=0.5):
