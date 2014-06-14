@@ -11,9 +11,9 @@ from playlist import Playlist
 from effects.base import EffectLayer, RGBLayer, SnowstormLayer, TechnicolorSnowstormLayer, WhiteOutLayer, ColorLayer
 from gameplay import PercentageResponsiveEffectLayer
 
-def generate_player_renderer(params, color, inverse=False):
-    hsv = colorsys.rgb_to_hsv(color[0], color[1], color[2])
-    similar_color = colorsys.hsv_to_rgb(hsv[0] + 0.15, hsv[1], hsv[2])
+def generate_player_renderer(params, color, similar_color, inverse=False):
+    # hsv = colorsys.rgb_to_hsv(color[0], color[1], color[2])
+    # similar_color = colorsys.hsv_to_rgb(hsv[0] + 0.15, hsv[1], hsv[2])
     regular_play = Playlist([
         [OscillatingSpeedResponsiveTwoColorLayer(color, similar_color, inverse=inverse)]
         ])

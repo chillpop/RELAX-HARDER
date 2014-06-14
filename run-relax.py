@@ -13,9 +13,7 @@ from renderer import Renderer
 from playlist import Playlist
 
 PLAYER_ONE_ADDRESS = '74:E5:43:BE:39:71'
-PLAYER_ONE_COLOR = [1., 0., 0.]
 PLAYER_TWO_ADDRESS = '74:E5:43:B1:96:E0'
-PLAYER_TWO_COLOR = [0., 0., 1.]
 
 if __name__ == '__main__':
 
@@ -36,8 +34,14 @@ if __name__ == '__main__':
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
     player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
 
-    renderer_low = generate_player_renderer(shared_params, PLAYER_ONE_COLOR, inverse=True)
-    renderer_high = generate_player_renderer(shared_params, PLAYER_TWO_COLOR)
+    yellowish = [1.0, 0.84, 0.28]
+    greenish = [0.2, 0.4, 0.]
+
+    purple = [0.2, 0., 0.3]
+    pink = [0.7, 0.5, 0.4]
+
+    renderer_low = generate_player_renderer(shared_params, purple, pink, inverse=True)
+    renderer_high = generate_player_renderer(shared_params, greenish, yellowish)
     game = GameObject(shared_params, renderer_low, renderer_high)
     game.start()
     controller = AnimationController(game_object=game, 

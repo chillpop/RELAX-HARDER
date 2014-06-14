@@ -32,13 +32,21 @@ if __name__ == '__main__':
     def random_color():
         return colorsys.hsv_to_rgb(random.random(),1,1)
 
-    playlist = Playlist([
-                [AnimatingWipeTransition(ColorSnowstormLayer([0., 0., 1.]), 
-                    OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5]),
-                    5.0, inverse=True)],
+    yellowish = [1.0, 0.84, 0.28]
+    greenish = [0.2, 0.4, 0.]
 
-        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5]) ],
-        [ OscillatingSpeedResponsiveTwoColorLayer([0., 0., 1.], [1., 1., 0.5], inverse=True) ],
+    purple = [0.2, 0., 0.3]
+    pink = [0.7, 0.5, 0.4]
+
+    playlist = Playlist([
+                            # [OscillatingSpeedResponsiveTwoColorLayer(yellowish, greenish)],
+
+                # [AnimatingWipeTransition(TwoColorSnowstormLayer(yellowish, greenish), 
+                #     OscillatingSpeedResponsiveTwoColorLayer(yellowish, greenish),
+                #     5.0, inverse=True)],
+
+        [ OscillatingSpeedResponsiveTwoColorLayer(greenish, yellowish) ],
+        [ OscillatingSpeedResponsiveTwoColorLayer(purple, pink, inverse=True) ],
         [ WhiteOutLayer() ],
         [ RGBLayer() ],
         [ SnowstormLayer() ],
@@ -70,6 +78,7 @@ if __name__ == '__main__':
 
     renderer = Renderer(playlists={'all': playlist}, gamma=2.2)
     renderer_high = Renderer(playlists={'all': copy.copy(playlist)}, gamma=2.2)
+    renderer.advanceCurrentPlaylist(fadeTime=0.001)
     controller = AnimationController(renderer_low=renderer, params=shared_params, server=ip_address, 
         game_object=None, renderer_high=renderer_high)
     controller.drawingLoop()
