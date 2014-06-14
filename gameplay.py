@@ -91,7 +91,7 @@ class GameObject(object):
             if not eeg or not eeg.on:
                 renderer.swapPlaylists(self.params.NO_HEADSET_STATE, fadeTime=0.1)
             else:
-                renderer.swapPlaylists(self.params.PLAY_STATE, fadeTime=0.5)
+                renderer.swapPlaylists(self.params.PLAY_STATE, fadeTime=0.1)
             last_eeg = eeg
         return last_eeg
 
