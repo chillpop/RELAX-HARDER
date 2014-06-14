@@ -8,8 +8,6 @@ from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
 from effects.base import *
-from effects.drifters import *
-from effects.impulses import *
 from parameters import SharedParameters
 from gameplay import *
 from game_effects import *
