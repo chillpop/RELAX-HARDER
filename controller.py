@@ -171,7 +171,9 @@ class AnimationController(object):
     def drawingLoop(self):
         """Render frames forever or until keyboard interrupt"""
         #save existing terminal settings
-        old_settings = termios.tcgetattr(sys.stdin)
+        old_settings = None
+        if self.params.use_keyboard_input:
+            old_settings = termios.tcgetattr(sys.stdin)
         try:
             if self.params.use_keyboard_input:
                 tty.setcbreak(sys.stdin.fileno())
