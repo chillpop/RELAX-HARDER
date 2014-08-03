@@ -8,11 +8,11 @@ from effects.base import EffectLayer, HeadsetResponsiveEffectLayer
 from renderer import Renderer
 
 MAX_DELTA = 1.0
-MIN_DELTA = 0.02
-MAX_GAME_LENGTH = 6 * 60 
+MIN_DELTA = 0.01
+MAX_GAME_LENGTH = 60 * 4
 CHANGE_IN_DELTA_PER_SECOND = (MAX_DELTA - MIN_DELTA) / MAX_GAME_LENGTH
 ELAPSED_STARTUP_TIME = 2.0
-TIME_AT_MAX = 2.0
+TIME_AT_MAX = 1.0
 
 STATE_WAITING = 0
 STATE_COUNTDOWN = 1
