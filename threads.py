@@ -32,6 +32,11 @@ class HeadsetThread(ParamThread):
     def run(self):
         while True:
             point = self.headset.readDatapoint()
+            if not point:
+                #try to reconnect if we lose the connection
+                self.headset.disconnect
+                self.headset.socket = None
+                continue
 
             self.attention_list.append(point.attention_scaled)
             self.meditation_list.append(point.meditation_scaled)
