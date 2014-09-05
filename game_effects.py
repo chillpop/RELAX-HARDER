@@ -37,6 +37,7 @@ def generate_player_renderer(params, color, similar_color, inverse=False):
     all_lists = {params.PLAY_STATE: regular_play,
                 params.NO_HEADSET_STATE: no_headset,
                 params.WIN_STATE: winner,
+                params.WAITING_FOR_OTHER_PLAYER_STATE: winner,
                 params.STARTUP_STATE: countdown}
     return Renderer(all_lists, activePlaylist=params.NO_HEADSET_STATE)
 

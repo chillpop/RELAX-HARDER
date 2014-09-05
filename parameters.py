@@ -42,4 +42,5 @@ class SharedParameters(object):
     PLAY_STATE = 'regular_play'
     NO_HEADSET_STATE = 'no_headset'
     WIN_STATE = 'winner'
+    WAITING_FOR_OTHER_PLAYER_STATE = 'waiting'
     STARTUP_STATE = 'startup'

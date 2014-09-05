@@ -103,13 +103,23 @@ class GameObject(object):
         self.renderer_low.swapPlaylists(playlist, fadeTime=fadeTime)
         self.renderer_high.swapPlaylists(playlist, fadeTime=fadeTime)
 
+    def update_waiting(self, renderer_waiting, renderer_disconnected):
+        renderer_waiting.swapPlaylists(self.params.WAITING_FOR_OTHER_PLAYER_STATE, fadeTime=0.1)
+        renderer_disconnected.swapPlaylists(self.params.NO_HEADSET_STATE, fadeTime=0.1)
+
     def loop(self):
-        # TODO: don't start the countdown until we know that both headsets are connected and giving good data
+        # don't start the countdown until we know that both headsets are connected and giving good data
         if self.game_state == STATE_WAITING:
             def valid_eeg(eeg):
                 return eeg and eeg.on
             if valid_eeg(self.params.eeg1) and valid_eeg(self.params.eeg2):
                 self.begin_countdown()
+            elif valid_eeg(self.params.eeg1):
+                self.update_waiting(self.renderer_low, self.renderer_high)
+            elif valid_eeg(self.params.eeg2):
+                self.update_waiting(self.renderer_high, self.renderer_low)
+            else:
+                self.change_playlist(self.params.NO_HEADSET_STATE)
             return
         elif self.game_state == STATE_COUNTDOWN:
             if self.params.time - self.start_time < self.params.COUNTDOWN_TIME:
