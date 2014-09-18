@@ -17,11 +17,14 @@ PLAYER_TWO_ADDRESS = '74:E5:43:B1:96:E0'
 
 if __name__ == '__main__':
 
-    test = len(sys.argv) > 1 and sys.argv[1] == 'test'
+    num_args = len(sys.argv)
+    test = num_args > 1 and sys.argv[1] == 'test'
   
     ip_address = None
-    if test and len(sys.argv) > 2:
+    if test and num_args > 2:
         ip_address = sys.argv[2]
+    elif num_args > 1:
+        ip_address = sys.argv[1]
 
     # ip_address = '192.168.7.2:7890'
     
