@@ -14,6 +14,21 @@ Headset UUIDs
 
 ------------------
 
+Bluetooth display
+
+iOS app that acts as a Bluetooth peripheral
+service: RELAX HARDER
+	notify characteristics: (iOS peripheral -> python central) CBCharacteristicPropertyNotify
+		restart game
+	writable characteristics: (python central -> iOS peripheral) CBCharacteristicPropertyWrite(WithoutResponse)
+		total game time (write once per session)
+		game start timestamp (write once per game)
+		game percentage (ongoing, 30-60Hz?)
+		player one data (meditation, avg meditation, attention, avg attention, eeg on, eeg signal)
+		player two data (meditation, avg meditation, attention, avg attention, eeg on, eeg signal)
+
+------------------
+
 startup
 some animation while waiting for things to connect
 countdown animation after everything is connected
