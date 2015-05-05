@@ -11,6 +11,7 @@ from game_effects import generate_player_renderer
 from controller import AnimationController
 from renderer import Renderer
 from playlist import Playlist
+from ble_reflector import RelaxReflector
 
 PLAYER_ONE_ADDRESS = '74:E5:43:BE:39:71'
 PLAYER_TWO_ADDRESS = '74:E5:43:B1:96:E0'
@@ -59,4 +60,5 @@ if __name__ == '__main__':
 
     # start the lights
     time.sleep(0.05)
+    RelaxReflector.create_reflector(shared_params)
     controller.drawingLoop()
