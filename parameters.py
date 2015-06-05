@@ -34,7 +34,7 @@ class SharedParameters(object):
 
     debug = True
     use_keyboard_input = True
-    frames_to_average = 3
+    frames_to_average = 2
 
     button_pin = "P8_12"
 
