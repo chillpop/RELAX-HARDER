@@ -5,7 +5,7 @@ import math
 import time
 import colorsys
 import random
-from parameters import SharedParameters
+from parameters import SharedParameters, EEGInfo
 from renderer import Renderer
 from playlist import Playlist
 from effects.base import EffectLayer, RGBLayer, SnowstormLayer, TechnicolorSnowstormLayer, WhiteOutLayer, ColorLayer
@@ -19,7 +19,10 @@ def generate_player_renderer(params, color, similar_color, inverse=False):
         ])
 
     no_headset = Playlist([
-        [SnowstormLayer()]
+        [
+        SnowstormLayer(),
+        PoorSignalLayer(similar_color, inverse=inverse)
+        ]
         ])
 
     winner = Playlist([
@@ -46,6 +49,36 @@ def oscillating_value(input_value, rate_of_change, minimum, span, phase_shift=0.
 	radians = rate_of_change * cycle * input_value + (phase_shift * cycle)
 	scale = minimum + span * 0.5 * (math.cos(radians) + 1)
 	return scale
+
+class PoorSignalLayer(ColorLayer):
+    # """A color layer indicating signal strength of an attached headset"""
+    def __init__(self, color, inverse=False):
+        super(PoorSignalLayer,self).__init__(color)
+        self.inverse = inverse
+        self.max_poor_signal = 200
+        # show this many pixels of singal strength
+        self.count = 10
+        # with this color as background
+        self.background_color = [1, 0, 0]
+        self.signal_scale = self.count / float(self.max_poor_signal)
+
+    def render(self, params, frame):
+        def num_filled_pixels(eeg):
+            if eeg is None:
+                return 0
+            return (self.max_poor_signal - eeg.poor_signal) * self.signal_scale
+
+        if self.inverse:
+            frame[:self.count] = self.background_color
+            i = num_filled_pixels(params.eeg1)
+            if i > 0:
+                frame[:int(i)] = self.color
+
+        else:
+            frame[-self.count:] = self.background_color
+            i = num_filled_pixels(params.eeg2)
+            if i > 0:
+                frame[-int(i):] = self.color
 
 class ColorSnowstormLayer(ColorLayer):
 	# """A color noise layer"""
