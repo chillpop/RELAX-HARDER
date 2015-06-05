@@ -35,16 +35,15 @@ if __name__ == '__main__':
         shared_params.debug = False
 
     player1 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_ONE_ADDRESS)
-    player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
-
     yellowish = [1.0, 0.84, 0.28]
     greenish = [0.2, 0.4, 0.]
+    renderer_high = generate_player_renderer(shared_params, greenish, yellowish)
 
+    player2 = FakeHeadset(random_data = True) if test else BluetoothHeadset(PLAYER_TWO_ADDRESS)
     purple = [0.2, 0., 0.3]
     pink = [0.7, 0.5, 0.4]
-
     renderer_low = generate_player_renderer(shared_params, purple, pink, inverse=True)
-    renderer_high = generate_player_renderer(shared_params, greenish, yellowish)
+
     game = GameObject(shared_params, renderer_low, renderer_high)
     game.start()
     controller = AnimationController(game_object=game, 
