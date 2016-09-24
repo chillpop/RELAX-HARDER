@@ -39,7 +39,7 @@ class SharedParameters(object):
     #BeagleBone button pin is a string
     # button_pin = "P8_12"
     #Raspberry Pi button pin is a number
-    button_pin = 4
+    reset_button_pin = 5
 
     #game states
     PLAY_STATE = 'regular_play'
