@@ -21,11 +21,10 @@ class SharedParameters(object):
     """Inputs to the individual effect layers. Includes basics like the timestamp of the frame we're
        generating, as well as parameters that may be used to control individual layers in real-time.
        """
-    # Raspberry Pi has only 60 pixels attached
-    num_pixels = 60 # 120
+    num_pixels = 110 # 120
     time = 0
     delta_t = 0
-    targetFrameRate = 59.0     # XXX: Want to go higher, but gl_server can't keep up!
+    targetFrameRate = 100.0
     eeg1 = None
     eeg2 = None
     percentage = 0.5
