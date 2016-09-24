@@ -21,10 +21,10 @@ class SharedParameters(object):
     """Inputs to the individual effect layers. Includes basics like the timestamp of the frame we're
        generating, as well as parameters that may be used to control individual layers in real-time.
        """
-    num_pixels = 120
+    num_pixels = 110 # 120
     time = 0
     delta_t = 0
-    targetFrameRate = 59.0     # XXX: Want to go higher, but gl_server can't keep up!
+    targetFrameRate = 100.0
     eeg1 = None
     eeg2 = None
     percentage = 0.5
@@ -36,7 +36,10 @@ class SharedParameters(object):
     use_keyboard_input = True
     frames_to_average = 2
 
-    button_pin = "P8_12"
+    #BeagleBone button pin is a string
+    # button_pin = "P8_12"
+    #Raspberry Pi button pin is a number
+    button_pin = 4
 
     #game states
     PLAY_STATE = 'regular_play'

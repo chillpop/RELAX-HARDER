@@ -13,12 +13,22 @@ import struct
 import tty
 import select
 import termios
+
 try:
-    import Adafruit_BBIO.GPIO as GPIO
+    print "trying to use RPi.GPIO"
+    import RPi.GPIO as GPIO
 except ImportError, e:
-  # This package does not exist on mac
-  GPIO = None
-  pass
+    try:
+        print "trying to use Adafruit_BBIO.GPIO"
+        import Adafruit_BBIO.GPIO as GPIO
+    except ImportError, e:
+        print "both tries failed, not using GPIO"
+      # This package does not exist on mac
+        GPIO = None
+        pass
+
+def platform_is_raspberrypi():
+    return GPIO != None and GPIO.__name__.startswith("RPi")
 
 def get_key_or_none():
     c = None
@@ -33,19 +43,23 @@ class AnimationController(object):
        """
 
     def __init__(self, game_object, renderer_low, renderer_high, params=None, server=None):
-        self.opc = FastOPC(server)
+        self.params = params or SharedParameters()
+        self.pixel_writer = FastOPC(server=server)
         self.game_object = game_object
         self.layer_mixer = PercentageLayerMixer()
         self.renderer_low = renderer_low
         self.renderer_high = renderer_high
-        self.params = params or SharedParameters()
 
         self._fpsFrames = 0
         self._fpsTime = 0
         self._fpsLogPeriod = 0.5    # How often to log frame rate
 
         if GPIO != None:
-            GPIO.setup(self.params.button_pin, GPIO.IN)
+            if platform_is_raspberrypi():
+                GPIO.setmode(GPIO.BCM)
+                GPIO.setup(self.params.button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            else:
+                GPIO.setup(self.params.button_pin, GPIO.IN)
             GPIO.add_event_detect(self.params.button_pin, GPIO.BOTH)
             self.button_down_start = None
 
@@ -152,7 +166,7 @@ class AnimationController(object):
 
     def frameToHardwareFormat(self, frame):
         """Convert a frame in our abstract floating-point format to the specific format used
-           by the OPC server. Does not clip to the range [0,255], this is handled by FastOPC.
+           by the OPC server. Does not clip to the range [0,255].
 
            Modifies 'frame' in-place.
            """
@@ -166,7 +180,7 @@ class AnimationController(object):
             self.game_object.loop()
         pixels = self.renderLayers()
         self.frameToHardwareFormat(pixels)
-        self.opc.putPixels(0, pixels)
+        self.pixel_writer.putPixels(pixels)
 
     def drawingLoop(self):
         """Render frames forever or until keyboard interrupt"""
@@ -184,21 +198,32 @@ class AnimationController(object):
         finally:
             if self.params.use_keyboard_input:
                 termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-        
-class FastOPC(object):
+
+class PixelWriter(object):
+    def putPixels(self, pixels):
+        """Send a list of 8-bit colors to the LED hardware.
+           'Pixels' is an array of any shape, in RGB order. Pixels range from 0 to 255.
+
+           They need not already be clipped to this range; that's taken care of here.
+           'pixels' is clipped in-place. If any values are out of range, the array is modified.
+           """
+        pass
+
+class FastOPC(PixelWriter):
     """High-performance Open Pixel Control client, using Numeric Python.
        By default, assumes the OPC server is running on localhost. This may be overridden
        with the OPC_SERVER environment variable, or the 'server' keyword argument.
        """
 
-    def __init__(self, server=None):
+    def __init__(self, channel=0, server=None):
+        self.channel = channel
         self.server = server or os.getenv('OPC_SERVER') or '127.0.0.1:7890'
         self.host, port = self.server.split(':')
         self.port = int(port)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((self.host, self.port))
 
-    def putPixels(self, channel, pixels):
+    def putPixels(self, pixels):
         """Send a list of 8-bit colors to the indicated channel. (OPC command 0x00).
            'Pixels' is an array of any shape, in RGB order. Pixels range from 0 to 255.
 
@@ -209,7 +234,7 @@ class FastOPC(object):
         numpy.clip(pixels, 0, 255, pixels)
         packedPixels = pixels.astype('B').tostring()
         header = struct.pack('>BBH',
-            channel,
+            self.channel,
             0x00,  # Command
             len(packedPixels))
         self.socket.send(header + packedPixels)
