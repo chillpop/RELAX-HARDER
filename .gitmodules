@@ -4,3 +4,6 @@
 [submodule "Mindwave"]
 	path = Mindwave
 	url = https://github.com/chillpop/python-mindwave-mobile.git
+[submodule "fadecandy"]
+	path = fadecandy
+	url = https://github.com/chillpop/fadecandy.git
