@@ -21,7 +21,6 @@ class SharedParameters(object):
     """Inputs to the individual effect layers. Includes basics like the timestamp of the frame we're
        generating, as well as parameters that may be used to control individual layers in real-time.
        """
-    neopixel_pin = 18
     # Raspberry Pi has only 60 pixels attached
     num_pixels = 60 # 120
     time = 0

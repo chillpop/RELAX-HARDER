@@ -17,7 +17,6 @@ import termios
 try:
     print "trying to use RPi.GPIO"
     import RPi.GPIO as GPIO
-    import neopixel
 except ImportError, e:
     try:
         print "trying to use Adafruit_BBIO.GPIO"
@@ -45,10 +44,7 @@ class AnimationController(object):
 
     def __init__(self, game_object, renderer_low, renderer_high, params=None, server=None):
         self.params = params or SharedParameters()
-        if platform_is_raspberrypi() and server is None:
-            self.pixel_writer = NeoPixelWriter(self.params.num_pixels, self.params.neopixel_pin)
-        else:
-            self.pixel_writer = FastOPC(server)
+        self.pixel_writer = FastOPC(server=server)
         self.game_object = game_object
         self.layer_mixer = PercentageLayerMixer()
         self.renderer_low = renderer_low
@@ -212,24 +208,6 @@ class PixelWriter(object):
            'pixels' is clipped in-place. If any values are out of range, the array is modified.
            """
         pass
-
-class NeoPixelWriter(PixelWriter):
-    """Pixel writer that uses the AdaFruit_NeoPixel class to write out to neopixels
-        attached to a Raspberry Pi.  Requires the installation of the rpi_ws281x library
-        and the Adafruit_NeoPixel python wrapper
-        """
-    def __init__(self, num_pixels, pin, channel=0):
-        self.strip = neopixel.Adafruit_NeoPixel(num_pixels, pin, channel=channel)
-        self.strip.begin()
-
-    def putPixels(self, pixels):
-        numpy.clip(pixels, 0, 255, pixels)
-        intPixels = pixels.astype(int)
-        i = 0
-        for p in intPixels:
-            self.strip.setPixelColorRGB(i, p[0], p[1], p[2])
-            i += 1
-        self.strip.show()
 
 class FastOPC(PixelWriter):
     """High-performance Open Pixel Control client, using Numeric Python.
