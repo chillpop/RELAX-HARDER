@@ -64,21 +64,21 @@ class AnimationController(object):
                     callback=callback, 
                     bouncetime=hold_time)
 
+            def restartGameFromButtonPress(button_pin):
+                print 'restart game button pressed'
+                if self.game_object != None:
+                    self.game_object.start()
+
+            def shutdownFromButtonPress(button_pin):
+                print 'shutting down!!!'
+                # NOTE: this must be run as root for shutdown to work
+                os.system("sudo shutdown -h now")
+
             oneSecondMs = 1000
             # restart game button
             addGPIOButtonCallback(self.params.reset_button_pin, restartGameFromButtonPress, oneSecondMs)
             # shutdown button
-            addGPIOButtonCallback(self.params.shutdown_button_pin, shutdownFromButtonPress, oneSecondMs)
-
-    def restartGameFromButtonPress(button_pin):
-        print 'restart game button pressed'
-        if self.game_object != None:
-            self.game_object.start()
-
-    def shutdownFromButtonPress(button_pin):
-        print 'shutting down!!!'
-        # NOTE: this must be run as root for shutdown to work
-        os.system("sudo shutdown -h now")
+            addGPIOButtonCallback(self.params.shutdown_button_pin, shutdownFromButtonPress, 5 * oneSecondMs)
 
     def advanceTime(self):
         """Update the timestep in EffectParameters.
