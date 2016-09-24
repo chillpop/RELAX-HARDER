@@ -1,6 +1,3 @@
-[submodule "LEDscape"]
-	path = LEDscape
-	url = https://github.com/chillpop/LEDscape.git
 [submodule "Mindwave"]
 	path = Mindwave
 	url = https://github.com/chillpop/python-mindwave-mobile.git
