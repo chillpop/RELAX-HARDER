@@ -40,6 +40,7 @@ class SharedParameters(object):
     # button_pin = "P8_12"
     #Raspberry Pi button pin is a number
     reset_button_pin = 5
+    shutdown_button_pin = 19
 
     #game states
     PLAY_STATE = 'regular_play'
