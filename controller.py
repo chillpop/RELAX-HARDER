@@ -36,6 +36,33 @@ def get_key_or_none():
         c = sys.stdin.read(1)
     return c
 
+class LongPressButtonInput(object):
+    def __init__(self, pin, callback, hold_time):
+        self.pin = pin
+        self.callback = callback
+        self.hold_time = hold_time
+        self.button_down_start = None
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(pin, GPIO.BOTH)
+
+    def update(self, time):
+        if GPIO.event_detected(self.pin):
+            if GPIO.input(self.pin):
+                print 'pin %d down' % self.pin
+                self.button_down_start = time
+            else :
+                print 'pin %d up' % self.pin
+                self.button_down_start = None
+
+        if self.button_down_start != None:
+            delta_t = time - self.button_down_start
+            if delta_t > self.hold_time:
+                print 'you held pin %d down for %.2f seconds' % {self.pin, delta_t}
+                self.button_down_start = None
+                if self.callback != None:
+                    self.callback()
+
+
 class AnimationController(object):
     """Manages the main animation loop. Each EffectLayer from the 'layers' list is run in order to
        produce a final frame of LED data which we send to the OPC server. This class manages frame
@@ -54,31 +81,25 @@ class AnimationController(object):
         self._fpsTime = 0
         self._fpsLogPeriod = 0.5    # How often to log frame rate
 
+        self.button_inputs = None
         if GPIO != None:
             if platform_is_raspberrypi():
                 GPIO.setmode(GPIO.BCM)
-            def addGPIOButtonCallback(pin, callback, hold_time):
-                GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-                GPIO.add_event_detect(pin, 
-                    GPIO.FALLING, 
-                    callback=callback, 
-                    bouncetime=hold_time)
 
-            def restartGameFromButtonPress(button_pin):
+            def restartGameFromButtonPress():
                 print 'restart game button pressed'
                 if self.game_object != None:
                     self.game_object.start()
 
-            def shutdownFromButtonPress(button_pin):
+            def shutdownFromButtonPress():
                 print 'shutting down!!!'
                 # NOTE: this must be run as root for shutdown to work
                 os.system("sudo shutdown -h now")
 
-            oneSecondMs = 1000
-            # restart game button
-            addGPIOButtonCallback(self.params.reset_button_pin, restartGameFromButtonPress, oneSecondMs)
-            # shutdown button
-            addGPIOButtonCallback(self.params.shutdown_button_pin, shutdownFromButtonPress, 5 * oneSecondMs)
+            self.button_inputs = [
+                LongPressButtonInput(self.params.reset_button_pin, restartGameFromButtonPress, 1.0),
+                LongPressButtonInput(self.params.shutdown_button_pin, shutdownFromButtonPress, 5.0)
+            ]
 
     def advanceTime(self):
         """Update the timestep in EffectParameters.
@@ -122,6 +143,10 @@ class AnimationController(object):
             sys.stderr.write("%7.2f FPS\n" % fps)
 
     def checkInput(self):
+        if self.button_inputs != None:
+            for button in self.button_inputs:
+                button.update(self.params.time)
+
         if self.params.use_keyboard_input:
             # http://stackoverflow.com/a/1450063
             # poll for keyboard input
